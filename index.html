@@ -68,6 +68,39 @@
             padding-left: 25px;
         }
         
+        .code-box {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .code-label {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .verification-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin: 15px 0;
+        }
+        
+        .code-instruction {
+            color: white;
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
         .whatsapp-box {
             background: #dcf8c6;
             border: 2px solid #25D366;
@@ -82,11 +115,54 @@
             margin-bottom: 10px;
         }
         
-        .whatsapp-number {
-            font-size: 20px;
-            font-weight: bold;
-            color: #25D366;
-            margin: 10px 0;
+        .decoder-box {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .decoder-box h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .decode-input {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .decode-input input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .decode-result {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .decode-result.show {
+            display: block;
+        }
+        
+        .result-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #10b981;
+            padding-left: 15px;
+            font-size: 16px;
         }
         
         .auto-save-indicator {
@@ -200,6 +276,17 @@
         
         .btn-whatsapp:hover {
             background: #128C7E;
+        }
+        
+        .btn-decode {
+            background: #3b82f6;
+            color: white;
+            padding: 15px 30px;
+            width: auto;
+        }
+        
+        .btn-decode:hover {
+            background: #2563eb;
         }
         
         .timer-box {
@@ -429,6 +516,11 @@
                 border-radius: 15px;
             }
             
+            .verification-code {
+                font-size: 24px;
+                letter-spacing: 2px;
+            }
+            
             .timer {
                 font-size: 18px;
             }
@@ -477,6 +569,10 @@
             
             .export-buttons button {
                 width: 100%;
+            }
+            
+            .decode-input {
+                flex-direction: column;
             }
             
             table {
@@ -539,6 +635,73 @@
     <script>
         // WhatsApp নম্বর (এখানে আপনার নম্বর দিন)
         const WHATSAPP_NUMBER = '+8801886667466'; // এই নম্বরটি পরিবর্তন করুন
+        
+        // Encoding/Decoding system - BACKGROUND mapping
+        // B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
+        const ENCODE_MAP = ['B', 'A', 'C', 'K', 'G', 'R', 'O', 'U', 'N', 'D'];
+        
+        // For decoding (letter to number)
+        function decodeChar(char) {
+            const map = {'B':0, 'A':1, 'C':2, 'K':3, 'G':4, 'R':5, 'O':6, 'U':7, 'N':8, 'D':9};
+            return map[char];
+        }
+        
+        // Generate verification code
+        function generateVerificationCode(correct, wrong, unanswered, phone, name) {
+            // Encode: সঠিক-ভুল-উত্তরহীন হিসেবে BACKGROUND letters
+            // উদাহরণ: 6 সঠিক, 2 ভুল, 0 উত্তরহীন = OCB
+            
+            const c = ENCODE_MAP[correct] || 'B';
+            const w = ENCODE_MAP[wrong] || 'B';
+            const u = ENCODE_MAP[unanswered] || 'B';
+            
+            // Random prefix/suffix যোগ করি
+            const randomLetters = ['B', 'A', 'C', 'K', 'G', 'R', 'O', 'U', 'N', 'D'];
+            const r1 = randomLetters[Math.floor(Math.random() * randomLetters.length)];
+            const r2 = randomLetters[Math.floor(Math.random() * randomLetters.length)];
+            
+            // Phone এর শেষ 2 digit
+            const phoneEnd = phone.replace(/\D/g, '').slice(-2);
+            
+            // Format: R1-CWU-R2PHONE
+            // উদাহরণ: K-OCB-G45 = 6 সঠিক, 2 ভুল, 0 উত্তরহীন, phone ends with 45
+            return `${r1}-${c}${w}${u}-${r2}${phoneEnd}`;
+        }
+        
+        // Decode verification code
+        function decodeVerificationCode(code) {
+            try {
+                // Format: R1-CWU-R2PHONE
+                // উদাহরণ: K-OCB-G45
+                const parts = code.toUpperCase().split('-');
+                if (parts.length !== 3) {
+                    return null;
+                }
+                
+                // মাঝের অংশ থেকে result নিব
+                const resultPart = parts[1]; // যেমন: OCB
+                if (resultPart.length !== 3) {
+                    return null;
+                }
+                
+                const correct = decodeChar(resultPart[0]);
+                const wrong = decodeChar(resultPart[1]);
+                const unanswered = decodeChar(resultPart[2]);
+                
+                if (correct === undefined || wrong === undefined || unanswered === undefined) {
+                    return null;
+                }
+                
+                return {
+                    correct: correct,
+                    wrong: wrong,
+                    unanswered: unanswered,
+                    code: code
+                };
+            } catch (e) {
+                return null;
+            }
+        }
         
         // প্রশ্ন ডাটা
         const QUESTIONS = [
@@ -628,21 +791,13 @@
         // WhatsApp এ পাঠানোর function
         function sendToWhatsApp(submission) {
             const message = `
-🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা - নতুন জমা
+🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা
 
 👤 নাম: ${submission.name}
 📱 মোবাইল: ${submission.phone}
+🔐 Verification Code: ${submission.verificationCode}
 
-📊 ফলাফল:
-✅ সঠিক উত্তর: ${submission.mcqCorrect}
-❌ ভুল উত্তর: ${submission.mcqWrong}
-⚪ উত্তরহীন: ${submission.mcqUnanswered}
-
-⏱️ সময়: ${submission.timeTaken}
-📅 জমার সময়: ${submission.submittedAt}
-
----
-সীরাতুন নবী ﷺ প্রতিযোগিতা
+আমার পরীক্ষা সম্পন্ন হয়েছে।
             `.trim();
 
             const encodedMessage = encodeURIComponent(message);
@@ -747,10 +902,10 @@
                 return;
             }
 
-            let csv = 'নাম,মোবাইল,সঠিক উত্তর,ভুল উত্তর,উত্তরহীন,সময়,জমার তারিখ\n';
+            let csv = 'নাম,মোবাইল,Code,সঠিক উত্তর,ভুল উত্তর,উত্তরহীন,সময়,জমার তারিখ\n';
             
             state.submissions.forEach(sub => {
-                csv += `"${sub.name}","${sub.phone}",${sub.mcqCorrect},${sub.mcqWrong},${sub.mcqUnanswered},"${sub.timeTaken}","${sub.submittedAt}"\n`;
+                csv += `"${sub.name}","${sub.phone}","${sub.verificationCode}",${sub.mcqCorrect},${sub.mcqWrong},${sub.mcqUnanswered},"${sub.timeTaken}","${sub.submittedAt}"\n`;
             });
 
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -770,6 +925,7 @@
                 'ক্রমিক': idx + 1,
                 'নাম': sub.name,
                 'মোবাইল': sub.phone,
+                'Code': sub.verificationCode,
                 'সঠিক উত্তর': sub.mcqCorrect,
                 'ভুল উত্তর': sub.mcqWrong,
                 'উত্তরহীন': sub.mcqUnanswered,
@@ -782,27 +938,6 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Results');
             
             XLSX.writeFile(wb, 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.xlsx');
-        }
-
-        function sendAllToWhatsApp() {
-            if (state.submissions.length === 0) {
-                alert('কোনো ডাটা নেই পাঠানোর জন্য');
-                return;
-            }
-
-            let message = '🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা\n\n';
-            message += `📊 মোট জমা: ${state.submissions.length}টি\n\n`;
-            
-            state.submissions.forEach((sub, idx) => {
-                message += `${idx + 1}. ${sub.name}\n`;
-                message += `   📱 ${sub.phone}\n`;
-                message += `   ✅ ${sub.mcqCorrect} | ❌ ${sub.mcqWrong} | ⚪ ${sub.mcqUnanswered}\n`;
-                message += `   ⏱️ ${sub.timeTaken}\n\n`;
-            });
-
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
         }
 
         // Format time
@@ -876,6 +1011,17 @@
                 }
             });
 
+            const unanswered = mcqs.length - correct - wrong;
+            
+            // Generate verification code
+            const verificationCode = generateVerificationCode(
+                correct, 
+                wrong, 
+                unanswered, 
+                state.participant.phone,
+                state.participant.name
+            );
+
             const shortAnswers = QUESTIONS
                 .filter(q => q.type === 'short')
                 .map(q => ({
@@ -886,9 +1032,10 @@
             const submission = {
                 name: state.participant.name,
                 phone: state.participant.phone,
+                verificationCode: verificationCode,
                 mcqCorrect: correct,
                 mcqWrong: wrong,
-                mcqUnanswered: mcqs.length - correct - wrong,
+                mcqUnanswered: unanswered,
                 shortAnswers: shortAnswers,
                 timeTaken: formatTime(timeTaken),
                 submittedAt: new Date().toLocaleString('bn-BD'),
@@ -972,6 +1119,83 @@
             }
         }
 
+        // Decode function for admin
+        function decodeCode() {
+            const input = document.getElementById('decodeInput');
+            const result = document.getElementById('decodeResult');
+            
+            if (!input || !result) return;
+            
+            const code = input.value.trim();
+            if (!code) {
+                alert('দয়া করে একটি Code দিন');
+                return;
+            }
+            
+            const decoded = decodeVerificationCode(code);
+            
+            if (decoded) {
+                // Find submission with this code
+                const submission = state.submissions.find(s => s.verificationCode === code.toUpperCase());
+                
+                if (submission) {
+                    result.innerHTML = `
+                        <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Verified!</h4>
+                        </div>
+                        <div class="result-item">
+                            <strong>👤 নাম:</strong> ${submission.name}
+                        </div>
+                        <div class="result-item">
+                            <strong>📱 মোবাইল:</strong> ${submission.phone}
+                        </div>
+                        <div class="result-item">
+                            <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
+                        </div>
+                        <div class="result-item">
+                            <strong>❌ ভুল উত্তর:</strong> ${decoded.wrong}
+                        </div>
+                        <div class="result-item">
+                            <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
+                        </div>
+                        <div class="result-item">
+                            <strong>⏱️ সময়:</strong> ${submission.timeTaken}
+                        </div>
+                        <div class="result-item">
+                            <strong>📅 জমার সময়:</strong> ${submission.submittedAt}
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                            <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Valid!</h4>
+                        </div>
+                        <div class="result-item">
+                            <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
+                        </div>
+                        <div class="result-item">
+                            <strong>❌ ভুল উত্তর:</strong> ${decoded.wrong}
+                        </div>
+                        <div class="result-item">
+                            <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
+                        </div>
+                        <p style="color: #6b7280; margin-top: 10px; font-size: 14px;">
+                            ⚠️ Database এ submission খুঁজে পাওয়া যায়নি
+                        </p>
+                    `;
+                }
+                result.classList.add('show');
+            } else {
+                result.innerHTML = `
+                    <div style="background: #fee2e2; padding: 15px; border-radius: 10px;">
+                        <h4 style="color: #991b1b; margin-bottom: 10px;">❌ Invalid Code!</h4>
+                        <p style="color: #991b1b;">এই Code টি সঠিক নয়। দয়া করে আবার চেষ্টা করুন।</p>
+                    </div>
+                `;
+                result.classList.add('show');
+            }
+        }
+
         // Render functions
         function renderStart() {
             return `
@@ -987,7 +1211,8 @@
                                 <li>⏰ সময়: ১ ঘন্টা (৬০ মিনিট)</li>
                                 <li>✅ একবার শুরু করলে থামানো যাবে না</li>
                                 <li>💾 আপনার উত্তর স্বয়ংক্রিয়ভাবে সংরক্ষিত হবে</li>
-                                <li>📱 পরীক্ষা শেষে WhatsApp এ ফলাফল পাঠাতে পারবেন</li>
+                                <li>🔐 পরীক্ষা শেষে একটি Verification Code পাবেন</li>
+                                <li>📱 Code সহ WhatsApp এ ফলাফল পাঠান</li>
                                 <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
                             </ul>
                         </div>
@@ -1096,26 +1321,16 @@
                             <h2>জমা সফল হয়েছে!</h2>
                             <p>${state.participant.name}, আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>
                             
-                            <div style="margin: 30px 0; padding: 20px; background: #f0fdf4; border-radius: 12px;">
-                                <h3 style="color: #065f46; margin-bottom: 15px;">📊 আপনার ফলাফল:</h3>
-                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
-                                    ✅ সঠিক উত্তর: <strong>${state.lastSubmission.mcqCorrect}</strong>
-                                </p>
-                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
-                                    ❌ ভুল উত্তর: <strong>${state.lastSubmission.mcqWrong}</strong>
-                                </p>
-                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
-                                    ⚪ উত্তরহীন: <strong>${state.lastSubmission.mcqUnanswered}</strong>
-                                </p>
-                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
-                                    ⏱️ সময়: <strong>${state.lastSubmission.timeTaken}</strong>
-                                </p>
+                            <div class="code-box">
+                                <div class="code-label">🔐 আপনার Verification Code</div>
+                                <div class="verification-code">${state.lastSubmission.verificationCode}</div>
+                                <div class="code-instruction">এই Code টি সংরক্ষণ করুন এবং WhatsApp এ পাঠান</div>
                             </div>
 
                             <div class="whatsapp-box">
-                                <h3>📱 WhatsApp এ ফলাফল পাঠান</h3>
+                                <h3>📱 WhatsApp এ Code পাঠান</h3>
                                 <p style="color: #6b7280; margin: 10px 0;">
-                                    আপনার ফলাফল নিচের নম্বরে পাঠান
+                                    নিচের বাটনে ক্লিক করে আপনার Code পাঠান
                                 </p>
                                 <div class="whatsapp-number">${displayNumber}</div>
                                 <button class="btn btn-whatsapp" onclick="window.open('${whatsappUrl}', '_blank')" style="margin-top: 15px;">
@@ -1145,6 +1360,7 @@
                         <td>${idx + 1}</td>
                         <td>${sub.name}</td>
                         <td>${sub.phone}</td>
+                        <td style="font-family: monospace;">${sub.verificationCode}</td>
                         <td><span class="badge badge-green">${sub.mcqCorrect}</span></td>
                         <td><span class="badge badge-red">${sub.mcqWrong}</span></td>
                         <td><span class="badge badge-gray">${sub.mcqUnanswered}</span></td>
@@ -1164,10 +1380,17 @@
                             <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
                         </div>
 
+                        <div class="decoder-box">
+                            <h3>🔍 Verification Code Decoder</h3>
+                            <p style="color: #6b7280; margin-bottom: 10px;">Code দিয়ে ফলাফল যাচাই করুন (BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9)</p>
+                            <div class="decode-input">
+                                <input type="text" id="decodeInput" placeholder="K-OCB-G45" maxlength="20">
+                                <button class="btn btn-decode" onclick="decodeCode()">Decode</button>
+                            </div>
+                            <div id="decodeResult" class="decode-result"></div>
+                        </div>
+
                         <div class="export-buttons">
-                            <button class="btn btn-whatsapp" onclick="sendAllToWhatsApp()">
-                                📱 সব ডাটা WhatsApp এ পাঠান
-                            </button>
                             <button class="btn btn-success" onclick="exportToExcel()">
                                 📊 Excel এ ডাউনলোড করুন
                             </button>
@@ -1184,6 +1407,7 @@
                                     <th>#</th>
                                     <th>নাম</th>
                                     <th>মোবাইল</th>
+                                    <th>Code</th>
                                     <th>সঠিক</th>
                                     <th>ভুল</th>
                                     <th>উত্তরহীন</th>
@@ -1192,7 +1416,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${rows || '<tr><td colspan="8" style="text-align:center; padding:40px; color:#9ca3af;">এখনো কোনো জমা নেই</td></tr>'}
+                                ${rows || '<tr><td colspan="9" style="text-align:center; padding:40px; color:#9ca3af;">এখনো কোনো জমা নেই</td></tr>'}
                             </tbody>
                         </table>
                     </div>
