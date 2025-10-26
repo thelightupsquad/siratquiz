@@ -85,13 +85,15 @@
         }
         
         .verification-code {
-            font-size: 36px;
+            font-size: 20px;
             font-weight: bold;
             color: white;
-            letter-spacing: 4px;
+            letter-spacing: 1px;
             font-family: 'Courier New', monospace;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
             margin: 15px 0;
+            word-break: break-all;
+            line-height: 1.6;
         }
         
         .code-instruction {
@@ -140,9 +142,10 @@
             border: 2px solid #3b82f6;
             border-radius: 10px;
             font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            text-transform: none;
+            letter-spacing: 0px;
             font-family: 'Courier New', monospace;
+            word-break: break-all;
         }
         
         .decode-result {
@@ -517,8 +520,9 @@
             }
             
             .verification-code {
-                font-size: 24px;
-                letter-spacing: 2px;
+                font-size: 14px;
+                letter-spacing: 0px;
+                word-break: break-all;
             }
             
             .timer {
@@ -646,15 +650,21 @@
             return map[char];
         }
         
-        // Base64 encode/decode functions
+        // Base64 encode/decode functions (UTF-8 safe for Bangla)
         function base64Encode(str) {
-            return btoa(unescape(encodeURIComponent(str)));
+            try {
+                return btoa(unescape(encodeURIComponent(str)));
+            } catch (e) {
+                console.error('Encode error:', e);
+                return btoa(str);
+            }
         }
         
         function base64Decode(str) {
             try {
                 return decodeURIComponent(escape(atob(str)));
             } catch (e) {
+                console.error('Decode error:', e);
                 return null;
             }
         }
@@ -1453,7 +1463,7 @@
                                 📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
                             </p>
                             <div class="decode-input">
-                                <input type="text" id="decodeInput" placeholder="Paste code here..." style="font-size: 14px;">
+                                <input type="text" id="decodeInput" placeholder="Code এখানে paste করুন..." style="font-size: 14px; text-transform: none;">
                                 <button class="btn btn-decode" onclick="decodeCode()">Decode</button>
                             </div>
                             <div id="decodeResult" class="decode-result"></div>
