@@ -634,7 +634,7 @@
 
     <script>
         // WhatsApp নম্বর (এখানে আপনার নম্বর দিন)
-        const WHATSAPP_NUMBER = '+8801886667466'; // এই নম্বরটি পরিবর্তন করুন
+        const WHATSAPP_NUMBER = '8801712345678'; // এই নম্বরটি পরিবর্তন করুন
         
         // Encoding/Decoding system - BACKGROUND mapping
         // B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
@@ -646,26 +646,111 @@
             return map[char];
         }
         
-        // Generate verification code
-        function generateVerificationCode(correct, wrong, unanswered, phone, name) {
-            // Encode: সঠিক-ভুল-উত্তরহীন হিসেবে BACKGROUND letters
-            // উদাহরণ: 6 সঠিক, 2 ভুল, 0 উত্তরহীন = OCB
+        // Base64 encode/decode functions
+        function base64Encode(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        
+        function base64Decode(str) {
+            try {
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        // Generate verification code with ALL information encoded
+        function generateVerificationCode(correct, wrong, unanswered, phone, name, timeTaken) {
+            // Part 1: Encode name and phone (Base64)
+            const namePhone = `${name}|${phone}`;
+            const encodedNamePhone = base64Encode(namePhone);
             
+            // Part 2: Result code (BACKGROUND encoding)
             const c = ENCODE_MAP[correct] || 'B';
             const w = ENCODE_MAP[wrong] || 'B';
             const u = ENCODE_MAP[unanswered] || 'B';
+            const resultCode = `${c}${w}${u}`;
             
-            // Random prefix/suffix যোগ করি
-            const randomLetters = ['B', 'A', 'C', 'K', 'G', 'R', 'O', 'U', 'N', 'D'];
-            const r1 = randomLetters[Math.floor(Math.random() * randomLetters.length)];
-            const r2 = randomLetters[Math.floor(Math.random() * randomLetters.length)];
+            // Part 3: Time code (মিনিট এবং সেকেন্ড encode)
+            const timeMatch = timeTaken.match(/(\d+):(\d+)/);
+            if (timeMatch) {
+                const mins = parseInt(timeMatch[1]);
+                const secs = parseInt(timeMatch[2]);
+                
+                // মিনিট encode (2 digit)
+                const min1 = ENCODE_MAP[Math.floor(mins / 10)] || 'B';
+                const min2 = ENCODE_MAP[mins % 10] || 'B';
+                
+                // সেকেন্ড encode (2 digit)
+                const sec1 = ENCODE_MAP[Math.floor(secs / 10)] || 'B';
+                const sec2 = ENCODE_MAP[secs % 10] || 'B';
+                
+                const timeCode = `${min1}${min2}${sec1}${sec2}`;
+                
+                // Final format: ENCODED_NAME_PHONE-RESULT-TIME
+                return `${encodedNamePhone}-${resultCode}-${timeCode}`;
+            }
             
-            // Phone এর শেষ 2 digit
-            const phoneEnd = phone.replace(/\D/g, '').slice(-2);
-            
-            // Format: R1-CWU-R2PHONE
-            // উদাহরণ: K-OCB-G45 = 6 সঠিক, 2 ভুল, 0 উত্তরহীন, phone ends with 45
-            return `${r1}-${c}${w}${u}-${r2}${phoneEnd}`;
+            return `${encodedNamePhone}-${resultCode}-BBBB`;
+        }
+        
+        // Decode verification code to get all information
+        function decodeVerificationCode(code) {
+            try {
+                const parts = code.split('-');
+                if (parts.length !== 3) {
+                    return null;
+                }
+                
+                // Part 1: Decode name and phone
+                const namePhone = base64Decode(parts[0]);
+                if (!namePhone) return null;
+                
+                const [name, phone] = namePhone.split('|');
+                
+                // Part 2: Decode result
+                const resultPart = parts[1];
+                if (resultPart.length !== 3) return null;
+                
+                const correct = decodeChar(resultPart[0]);
+                const wrong = decodeChar(resultPart[1]);
+                const unanswered = decodeChar(resultPart[2]);
+                
+                if (correct === undefined || wrong === undefined || unanswered === undefined) {
+                    return null;
+                }
+                
+                // Part 3: Decode time
+                const timePart = parts[2];
+                if (timePart.length !== 4) return null;
+                
+                const min1 = decodeChar(timePart[0]);
+                const min2 = decodeChar(timePart[1]);
+                const sec1 = decodeChar(timePart[2]);
+                const sec2 = decodeChar(timePart[3]);
+                
+                if (min1 === undefined || min2 === undefined || 
+                    sec1 === undefined || sec2 === undefined) {
+                    return null;
+                }
+                
+                const minutes = (min1 * 10) + min2;
+                const seconds = (sec1 * 10) + sec2;
+                const time = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                return {
+                    name: name,
+                    phone: phone,
+                    correct: correct,
+                    wrong: wrong,
+                    unanswered: unanswered,
+                    time: time,
+                    code: code
+                };
+            } catch (e) {
+                console.error('Decode error:', e);
+                return null;
+            }
         }
         
         // Decode verification code
@@ -1019,7 +1104,8 @@
                 wrong, 
                 unanswered, 
                 state.participant.phone,
-                state.participant.name
+                state.participant.name,
+                formatTime(timeTaken)
             );
 
             const shortAnswers = QUESTIONS
@@ -1135,55 +1221,32 @@
             const decoded = decodeVerificationCode(code);
             
             if (decoded) {
-                // Find submission with this code
-                const submission = state.submissions.find(s => s.verificationCode === code.toUpperCase());
-                
-                if (submission) {
-                    result.innerHTML = `
-                        <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                            <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Verified!</h4>
-                        </div>
-                        <div class="result-item">
-                            <strong>👤 নাম:</strong> ${submission.name}
-                        </div>
-                        <div class="result-item">
-                            <strong>📱 মোবাইল:</strong> ${submission.phone}
-                        </div>
-                        <div class="result-item">
-                            <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
-                        </div>
-                        <div class="result-item">
-                            <strong>❌ ভুল উত্তর:</strong> ${decoded.wrong}
-                        </div>
-                        <div class="result-item">
-                            <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
-                        </div>
-                        <div class="result-item">
-                            <strong>⏱️ সময়:</strong> ${submission.timeTaken}
-                        </div>
-                        <div class="result-item">
-                            <strong>📅 জমার সময়:</strong> ${submission.submittedAt}
-                        </div>
-                    `;
-                } else {
-                    result.innerHTML = `
-                        <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                            <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Valid!</h4>
-                        </div>
-                        <div class="result-item">
-                            <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
-                        </div>
-                        <div class="result-item">
-                            <strong>❌ ভুল উত্তর:</strong> ${decoded.wrong}
-                        </div>
-                        <div class="result-item">
-                            <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
-                        </div>
-                        <p style="color: #6b7280; margin-top: 10px; font-size: 14px;">
-                            ⚠️ Database এ submission খুঁজে পাওয়া যায়নি
-                        </p>
-                    `;
-                }
+                result.innerHTML = `
+                    <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Successfully Decoded!</h4>
+                    </div>
+                    <div class="result-item">
+                        <strong>👤 নাম:</strong> ${decoded.name}
+                    </div>
+                    <div class="result-item">
+                        <strong>📱 মোবাইল:</strong> ${decoded.phone}
+                    </div>
+                    <div class="result-item">
+                        <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
+                    </div>
+                    <div class="result-item">
+                        <strong>❌ ভুল উত্তর:</strong> ${decoded.wrong}
+                    </div>
+                    <div class="result-item">
+                        <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
+                    </div>
+                    <div class="result-item">
+                        <strong>⏱️ সময়:</strong> ${decoded.time}
+                    </div>
+                    <div class="result-item">
+                        <strong>🔐 Code:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 5px 10px; border-radius: 5px;">${decoded.code}</span>
+                    </div>
+                `;
                 result.classList.add('show');
             } else {
                 result.innerHTML = `
@@ -1382,9 +1445,15 @@
 
                         <div class="decoder-box">
                             <h3>🔍 Verification Code Decoder</h3>
-                            <p style="color: #6b7280; margin-bottom: 10px;">Code দিয়ে ফলাফল যাচাই করুন (BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9)</p>
+                            <p style="color: #6b7280; margin-bottom: 10px;">
+                                Code পেস্ট করুন - এতে নাম, ফোন, result, সময় সব encoded আছে
+                            </p>
+                            <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">
+                                📌 Format: EncodedNamePhone-ResultCode-TimeCode<br>
+                                📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
+                            </p>
                             <div class="decode-input">
-                                <input type="text" id="decodeInput" placeholder="K-OCB-G45" maxlength="20">
+                                <input type="text" id="decodeInput" placeholder="Paste code here..." style="font-size: 14px;">
                                 <button class="btn btn-decode" onclick="decodeCode()">Decode</button>
                             </div>
                             <div id="decodeResult" class="decode-result"></div>
