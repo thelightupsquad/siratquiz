@@ -650,21 +650,31 @@
             return map[char];
         }
         
-        // Base64 encode/decode functions (UTF-8 safe for Bangla)
+        // Base64 encode/decode functions (UTF-8 safe)
         function base64Encode(str) {
             try {
-                return btoa(unescape(encodeURIComponent(str)));
+                // Convert to UTF-8 bytes then to base64
+                const utf8Bytes = new TextEncoder().encode(str);
+                let binary = '';
+                utf8Bytes.forEach(byte => binary += String.fromCharCode(byte));
+                return btoa(binary);
             } catch (e) {
                 console.error('Encode error:', e);
-                return btoa(str);
+                return '';
             }
         }
         
         function base64Decode(str) {
             try {
-                return decodeURIComponent(escape(atob(str)));
+                // Decode base64 then convert from UTF-8 bytes
+                const binary = atob(str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return new TextDecoder().decode(bytes);
             } catch (e) {
-                console.error('Decode error:', e);
+                console.error('Decode error:', e, 'for string:', str);
                 return null;
             }
         }
@@ -709,30 +719,50 @@
             try {
                 const parts = code.split('-');
                 if (parts.length !== 3) {
+                    console.log('Invalid parts length:', parts.length);
                     return null;
                 }
                 
                 // Part 1: Decode name and phone
                 const namePhone = base64Decode(parts[0]);
-                if (!namePhone) return null;
+                console.log('Decoded namePhone:', namePhone);
                 
-                const [name, phone] = namePhone.split('|');
+                if (!namePhone) {
+                    console.log('Failed to decode namePhone');
+                    return null;
+                }
+                
+                const nameParts = namePhone.split('|');
+                if (nameParts.length !== 2) {
+                    console.log('Invalid nameParts:', nameParts);
+                    return null;
+                }
+                
+                const name = nameParts[0];
+                const phone = nameParts[1];
                 
                 // Part 2: Decode result
                 const resultPart = parts[1];
-                if (resultPart.length !== 3) return null;
+                if (resultPart.length !== 3) {
+                    console.log('Invalid result part length:', resultPart.length);
+                    return null;
+                }
                 
                 const correct = decodeChar(resultPart[0]);
                 const wrong = decodeChar(resultPart[1]);
                 const unanswered = decodeChar(resultPart[2]);
                 
                 if (correct === undefined || wrong === undefined || unanswered === undefined) {
+                    console.log('Invalid result chars');
                     return null;
                 }
                 
                 // Part 3: Decode time
                 const timePart = parts[2];
-                if (timePart.length !== 4) return null;
+                if (timePart.length !== 4) {
+                    console.log('Invalid time part length:', timePart.length);
+                    return null;
+                }
                 
                 const min1 = decodeChar(timePart[0]);
                 const min2 = decodeChar(timePart[1]);
@@ -741,12 +771,15 @@
                 
                 if (min1 === undefined || min2 === undefined || 
                     sec1 === undefined || sec2 === undefined) {
+                    console.log('Invalid time chars');
                     return null;
                 }
                 
                 const minutes = (min1 * 10) + min2;
                 const seconds = (sec1 * 10) + sec2;
                 const time = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                console.log('Successfully decoded:', { name, phone, correct, wrong, unanswered, time });
                 
                 return {
                     name: name,
@@ -1453,14 +1486,15 @@
                             <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
                         </div>
 
-                        <div class="decoder-box">
+                                                    <div class="decoder-box">
                             <h3>🔍 Verification Code Decoder</h3>
                             <p style="color: #6b7280; margin-bottom: 10px;">
                                 Code পেস্ট করুন - এতে নাম, ফোন, result, সময় সব encoded আছে
                             </p>
                             <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">
                                 📌 Format: EncodedNamePhone-ResultCode-TimeCode<br>
-                                📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
+                                📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9<br>
+                                📌 Console খুলে error দেখুন (F12 চাপুন)
                             </p>
                             <div class="decode-input">
                                 <input type="text" id="decodeInput" placeholder="Code এখানে paste করুন..." style="font-size: 14px; text-transform: none;">
