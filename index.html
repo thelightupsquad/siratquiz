@@ -323,6 +323,12 @@
             margin-bottom: 20px;
         }
         
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
         .hidden {
             display: none;
         }
@@ -354,7 +360,7 @@
     <div id="app"></div>
 
     <script>
-        // প্রশ্ন ডাটা (এখানে আপনার ১০০টি প্রশ্ন যোগ করবেন)
+        // প্রশ্ন ডাটা
         const QUESTIONS = [
             {
                 id: 1,
@@ -433,20 +439,63 @@
             timeLeft: 60 * 60,
             startTime: null,
             submissions: [],
-            timerInterval: null
+            timerInterval: null,
+            loading: false
         };
 
-        // Local Storage functions
-        function loadSubmissions() {
-            const saved = localStorage.getItem('sirat_submissions');
-            if (saved) {
-                state.submissions = JSON.parse(saved);
+        // Simple in-memory storage (fallback)
+        let memoryStorage = {};
+
+        // Storage functions
+        async function saveSubmission(submission) {
+            try {
+                const timestamp = Date.now();
+                const key = 'sub_' + timestamp + '_' + submission.phone.replace(/\D/g, '');
+                memoryStorage[key] = submission;
+                
+                // Also save to localStorage as backup
+                try {
+                    const allSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
+                    allSubs.push(submission);
+                    localStorage.setItem('sirat_subs', JSON.stringify(allSubs));
+                } catch(e) {
+                    console.log('localStorage not available');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Save error:', error);
+                return false;
             }
         }
 
-        function saveSubmission(submission) {
-            state.submissions.push(submission);
-            localStorage.setItem('sirat_submissions', JSON.stringify(state.submissions));
+        async function loadSubmissions() {
+            try {
+                // Load from memory
+                const memorySubs = Object.values(memoryStorage);
+                
+                // Load from localStorage
+                let localSubs = [];
+                try {
+                    localSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
+                } catch(e) {
+                    console.log('localStorage not available');
+                }
+                
+                // Merge and deduplicate
+                const allSubs = [...memorySubs, ...localSubs];
+                const uniqueSubs = {};
+                allSubs.forEach(sub => {
+                    const key = sub.phone + '_' + sub.submittedAt;
+                    uniqueSubs[key] = sub;
+                });
+                
+                state.submissions = Object.values(uniqueSubs);
+                return state.submissions;
+            } catch (error) {
+                console.error('Load error:', error);
+                return [];
+            }
         }
 
         // Format time
@@ -490,10 +539,13 @@
         }
 
         // Submit quiz
-        function submitQuiz() {
+        async function submitQuiz() {
             if (state.timerInterval) {
                 clearInterval(state.timerInterval);
             }
+            
+            state.loading = true;
+            render();
             
             const endTime = new Date();
             const timeTaken = Math.floor((endTime - state.startTime) / 1000);
@@ -526,10 +578,13 @@
                 mcqUnanswered: mcqs.length - correct - wrong,
                 shortAnswers: shortAnswers,
                 timeTaken: formatTime(timeTaken),
-                submittedAt: new Date().toLocaleString('bn-BD')
+                submittedAt: new Date().toLocaleString('bn-BD'),
+                timestamp: Date.now()
             };
 
-            saveSubmission(submission);
+            await saveSubmission(submission);
+            
+            state.loading = false;
             state.view = 'submitted';
             render();
         }
@@ -573,11 +628,14 @@
             render();
         }
 
-        function showAdmin() {
+        async function showAdmin() {
             const pass = prompt('অ্যাডমিন পাসওয়ার্ড:');
             if (pass === 'admin123') {
                 state.view = 'admin';
-                loadSubmissions();
+                state.loading = true;
+                render();
+                await loadSubmissions();
+                state.loading = false;
                 render();
             } else {
                 alert('ভুল পাসওয়ার্ড');
@@ -625,6 +683,10 @@
         }
 
         function renderQuiz() {
+            if (state.loading) {
+                return '<div class="loading">জমা হচ্ছে...</div>';
+            }
+
             const q = QUESTIONS[state.currentQuestion];
             const progress = ((state.currentQuestion + 1) / QUESTIONS.length) * 100;
 
@@ -711,19 +773,24 @@
         }
 
         function renderAdmin() {
-            loadSubmissions();
+            if (state.loading) {
+                return '<div class="loading">লোড হচ্ছে...</div>';
+            }
             
-            const rows = state.submissions.map(sub => `
-                <tr>
-                    <td>${sub.name}</td>
-                    <td>${sub.phone}</td>
-                    <td><span class="badge badge-green">${sub.mcqCorrect}</span></td>
-                    <td><span class="badge badge-red">${sub.mcqWrong}</span></td>
-                    <td><span class="badge badge-gray">${sub.mcqUnanswered}</span></td>
-                    <td>${sub.timeTaken}</td>
-                    <td style="font-size:12px;">${sub.submittedAt}</td>
-                </tr>
-            `).join('');
+            const rows = state.submissions
+                .sort((a, b) => b.timestamp - a.timestamp)
+                .map((sub, idx) => `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${sub.name}</td>
+                        <td>${sub.phone}</td>
+                        <td><span class="badge badge-green">${sub.mcqCorrect}</span></td>
+                        <td><span class="badge badge-red">${sub.mcqWrong}</span></td>
+                        <td><span class="badge badge-gray">${sub.mcqUnanswered}</span></td>
+                        <td>${sub.timeTaken}</td>
+                        <td style="font-size:12px;">${sub.submittedAt}</td>
+                    </tr>
+                `).join('');
 
             return `
                 <div class="container" style="max-width:1200px;">
@@ -741,6 +808,7 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>#</th>
                                     <th>নাম</th>
                                     <th>মোবাইল</th>
                                     <th>সঠিক</th>
@@ -751,7 +819,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${rows || '<tr><td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">এখনো কোনো জমা নেই</td></tr>'}
+                                ${rows || '<tr><td colspan="8" style="text-align:center; padding:40px; color:#9ca3af;">এখনো কোনো জমা নেই</td></tr>'}
                             </tbody>
                         </table>
                     </div>
