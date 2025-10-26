@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সীরাতুন নবী ﷺ প্রতিযোগিতা</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #d1fae5 0%, #99f6e4 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #065f46;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .info-box {
+            background: #d1fae5;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .info-box h3 {
+            color: #065f46;
+            margin-bottom: 15px;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .info-box li {
+            color: #374151;
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #d1d5db;
+            color: #374151;
+            padding: 12px 24px;
+            width: auto;
+        }
+        
+        .btn-secondary:hover {
+            background: #9ca3af;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .timer-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .timer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .timer {
+            color: #ef4444;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .question-badge {
+            display: inline-block;
+            background: #d1fae5;
+            color: #065f46;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            width: 100%;
+            padding: 18px;
+            margin: 10px 0;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            background: white;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .option:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .option.selected {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-buttons button {
+            flex: 1;
+        }
+        
+        .success-icon {
+            text-align: center;
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .success-message {
+            text-align: center;
+        }
+        
+        .success-message h2 {
+            color: #065f46;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .success-message p {
+            color: #6b7280;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        
+        .admin-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .admin-link button {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .admin-link button:hover {
+            color: #374151;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: #10b981;
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        th {
+            font-weight: bold;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .badge-gray {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .timer {
+                font-size: 18px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // প্রশ্ন ডাটা (এখানে আপনার ১০০টি প্রশ্ন যোগ করবেন)
+        const QUESTIONS = [
+            {
+                id: 1,
+                type: 'mcq',
+                question: 'রাসূলুল্লাহ ﷺ কোন সালে জন্মগ্রহণ করেন?',
+                options: ['৫৭০ খ্রিস্টাব্দ', '৫৬০ খ্রিস্টাব্দ', '৫৮০ খ্রিস্টাব্দ', '৫৯০ খ্রিস্টাব্দ'],
+                correctAnswer: 0
+            },
+            {
+                id: 2,
+                type: 'mcq',
+                question: 'রাসূলুল্লাহ ﷺ এর পিতার নাম কী?',
+                options: ['আবু তালিব', 'আবদুল্লাহ', 'আবদুল মুত্তালিব', 'আবু বকর'],
+                correctAnswer: 1
+            },
+            {
+                id: 3,
+                type: 'mcq',
+                question: 'রাসূলুল্লাহ ﷺ এর দুধ মাতার নাম কী?',
+                options: ['আমিনা', 'হালিমা', 'খাদিজা', 'আয়িশা'],
+                correctAnswer: 1
+            },
+            {
+                id: 4,
+                type: 'mcq',
+                question: 'প্রথম কোন মহিলা ইসলাম গ্রহণ করেন?',
+                options: ['আয়িশা রা.', 'ফাতিমা রা.', 'খাদিজা রা.', 'হাফসা রা.'],
+                correctAnswer: 2
+            },
+            {
+                id: 5,
+                type: 'mcq',
+                question: 'হিজরতের সময় রাসূলুল্লাহ ﷺ এর সাথী কে ছিলেন?',
+                options: ['উমর রা.', 'আবু বকর রা.', 'উসমান রা.', 'আলী রা.'],
+                correctAnswer: 1
+            },
+            {
+                id: 6,
+                type: 'mcq',
+                question: 'বদর যুদ্ধ কোন সালে সংঘটিত হয়?',
+                options: ['২ হিজরী', '৩ হিজরী', '৪ হিজরী', '৫ হিজরী'],
+                correctAnswer: 0
+            },
+            {
+                id: 7,
+                type: 'mcq',
+                question: 'উহুদ যুদ্ধে রাসূলুল্লাহ ﷺ এর কয়টি দাঁত শহীদ হয়?',
+                options: ['১টি', '২টি', '৩টি', '৪টি'],
+                correctAnswer: 1
+            },
+            {
+                id: 8,
+                type: 'mcq',
+                question: 'মক্কা বিজয় কোন সালে হয়?',
+                options: ['৬ হিজরী', '৭ হিজরী', '৮ হিজরী', '৯ হিজরী'],
+                correctAnswer: 2
+            },
+            {
+                id: 9,
+                type: 'short',
+                question: 'রাসূলুল্লাহ ﷺ এর মাতার নাম লিখুন।'
+            },
+            {
+                id: 10,
+                type: 'short',
+                question: 'মি\'রাজ কোন শহর থেকে সংঘটিত হয়েছিল?'
+            }
+        ];
+
+        // State
+        let state = {
+            view: 'start',
+            participant: { name: '', phone: '' },
+            answers: {},
+            currentQuestion: 0,
+            timeLeft: 60 * 60,
+            startTime: null,
+            submissions: [],
+            timerInterval: null
+        };
+
+        // Local Storage functions
+        function loadSubmissions() {
+            const saved = localStorage.getItem('sirat_submissions');
+            if (saved) {
+                state.submissions = JSON.parse(saved);
+            }
+        }
+
+        function saveSubmission(submission) {
+            state.submissions.push(submission);
+            localStorage.setItem('sirat_submissions', JSON.stringify(state.submissions));
+        }
+
+        // Format time
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+        }
+
+        // Start quiz
+        function startQuiz() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            if (!name || !phone) {
+                alert('দয়া করে নাম ও মোবাইল নম্বর দিন');
+                return;
+            }
+            
+            state.participant = { name, phone };
+            state.startTime = new Date();
+            state.view = 'quiz';
+            startTimer();
+            render();
+        }
+
+        // Timer
+        function startTimer() {
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                if (state.timeLeft <= 0) {
+                    submitQuiz();
+                }
+                updateTimer();
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const el = document.getElementById('timer');
+            if (el) el.textContent = formatTime(state.timeLeft);
+        }
+
+        // Submit quiz
+        function submitQuiz() {
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+            }
+            
+            const endTime = new Date();
+            const timeTaken = Math.floor((endTime - state.startTime) / 1000);
+            
+            const mcqs = QUESTIONS.filter(q => q.type === 'mcq');
+            let correct = 0, wrong = 0;
+            
+            mcqs.forEach(q => {
+                if (state.answers[q.id] !== undefined) {
+                    if (state.answers[q.id] === q.correctAnswer) {
+                        correct++;
+                    } else {
+                        wrong++;
+                    }
+                }
+            });
+
+            const shortAnswers = QUESTIONS
+                .filter(q => q.type === 'short')
+                .map(q => ({
+                    question: q.question,
+                    answer: state.answers[q.id] || 'উত্তর দেননি'
+                }));
+
+            const submission = {
+                name: state.participant.name,
+                phone: state.participant.phone,
+                mcqCorrect: correct,
+                mcqWrong: wrong,
+                mcqUnanswered: mcqs.length - correct - wrong,
+                shortAnswers: shortAnswers,
+                timeTaken: formatTime(timeTaken),
+                submittedAt: new Date().toLocaleString('bn-BD')
+            };
+
+            saveSubmission(submission);
+            state.view = 'submitted';
+            render();
+        }
+
+        // Answer functions
+        function selectAnswer(questionId, answerIndex) {
+            state.answers[questionId] = answerIndex;
+            render();
+        }
+
+        function updateShortAnswer(questionId) {
+            const el = document.getElementById('shortAnswer');
+            if (el) {
+                state.answers[questionId] = el.value;
+            }
+        }
+
+        // Navigation
+        function nextQuestion() {
+            if (state.currentQuestion < QUESTIONS.length - 1) {
+                state.currentQuestion++;
+                render();
+            }
+        }
+
+        function prevQuestion() {
+            if (state.currentQuestion > 0) {
+                state.currentQuestion--;
+                render();
+            }
+        }
+
+        function goToStart() {
+            state.view = 'start';
+            state.currentQuestion = 0;
+            state.answers = {};
+            state.timeLeft = 60 * 60;
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+            }
+            render();
+        }
+
+        function showAdmin() {
+            const pass = prompt('অ্যাডমিন পাসওয়ার্ড:');
+            if (pass === 'admin123') {
+                state.view = 'admin';
+                loadSubmissions();
+                render();
+            } else {
+                alert('ভুল পাসওয়ার্ড');
+            }
+        }
+
+        // Render functions
+        function renderStart() {
+            return `
+                <div class="container">
+                    <div class="card">
+                        <h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>
+                        <p class="subtitle">রাসূলুল্লাহ ﷺ এর জীবনী নিয়ে জ্ঞান প্রতিযোগিতা</p>
+                        
+                        <div class="info-box">
+                            <h3>প্রতিযোগিতার বিবরণ:</h3>
+                            <ul>
+                                <li>📝 মোট প্রশ্ন: ১০০টি (৯০টি MCQ + ১০টি সংক্ষিপ্ত)</li>
+                                <li>⏰ সময়: ১ ঘন্টা (৬০ মিনিট)</li>
+                                <li>✅ একবার শুরু করলে থামানো যাবে না</li>
+                                <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-group">
+                            <label>👤 আপনার নাম *</label>
+                            <input type="text" id="name" placeholder="পূর্ণ নাম লিখুন">
+                        </div>
+
+                        <div class="form-group">
+                            <label>📱 মোবাইল নম্বর *</label>
+                            <input type="tel" id="phone" placeholder="০১XXXXXXXXX">
+                        </div>
+
+                        <button class="btn btn-primary" onclick="startQuiz()">
+                            প্রতিযোগিতা শুরু করুন
+                        </button>
+
+                        <div class="admin-link">
+                            <button onclick="showAdmin()">অ্যাডমিন প্যানেল</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuiz() {
+            const q = QUESTIONS[state.currentQuestion];
+            const progress = ((state.currentQuestion + 1) / QUESTIONS.length) * 100;
+
+            let optionsHTML = '';
+            if (q.type === 'mcq') {
+                optionsHTML = q.options.map((opt, idx) => {
+                    const selected = state.answers[q.id] === idx ? 'selected' : '';
+                    return `
+                        <button class="option ${selected}" onclick="selectAnswer(${q.id}, ${idx})">
+                            <strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}
+                        </button>
+                    `;
+                }).join('');
+            } else {
+                const val = state.answers[q.id] || '';
+                optionsHTML = `
+                    <textarea id="shortAnswer" oninput="updateShortAnswer(${q.id})" 
+                              rows="4" style="width:100%; padding:15px; border:2px solid #d1d5db; border-radius:10px;"
+                              placeholder="এখানে আপনার উত্তর লিখুন...">${val}</textarea>
+                `;
+            }
+
+            return `
+                <div class="container">
+                    <div class="timer-box">
+                        <div class="timer-header">
+                            <div style="color:#065f46; font-weight:bold;">
+                                প্রশ্ন ${state.currentQuestion + 1} / ${QUESTIONS.length}
+                            </div>
+                            <div class="timer">
+                                ⏰ <span id="timer">${formatTime(state.timeLeft)}</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:${progress}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="question-card">
+                        <span class="question-badge">
+                            ${q.type === 'mcq' ? 'বহুনির্বাচনী' : 'সংক্ষিপ্ত উত্তর'}
+                        </span>
+                        <div class="question-text">${q.question}</div>
+                        ${optionsHTML}
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" onclick="prevQuestion()" 
+                                ${state.currentQuestion === 0 ? 'disabled' : ''}>
+                            পূর্ববর্তী
+                        </button>
+                        ${state.currentQuestion < QUESTIONS.length - 1 ? `
+                            <button class="btn btn-primary" onclick="nextQuestion()">
+                                পরবর্তী প্রশ্ন
+                            </button>
+                        ` : `
+                            <button class="btn btn-danger" onclick="submitQuiz()">
+                                জমা দিন
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSubmitted() {
+            return `
+                <div class="container" style="margin-top:100px;">
+                    <div class="card">
+                        <div class="success-icon">✅</div>
+                        <div class="success-message">
+                            <h2>জমা সফল হয়েছে!</h2>
+                            <p>${state.participant.name}, আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>
+                            <p style="font-weight:bold; color:#065f46; margin-top:20px;">
+                                ফলাফল শীঘ্রই ঘোষণা করা হবে ইনশাআল্লাহ।
+                            </p>
+                            <p style="color:#6b7280; margin-top:30px;">
+                                আল্লাহ আপনাকে উত্তম প্রতিদান দিন। 🤲
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAdmin() {
+            loadSubmissions();
+            
+            const rows = state.submissions.map(sub => `
+                <tr>
+                    <td>${sub.name}</td>
+                    <td>${sub.phone}</td>
+                    <td><span class="badge badge-green">${sub.mcqCorrect}</span></td>
+                    <td><span class="badge badge-red">${sub.mcqWrong}</span></td>
+                    <td><span class="badge badge-gray">${sub.mcqUnanswered}</span></td>
+                    <td>${sub.timeTaken}</td>
+                    <td style="font-size:12px;">${sub.submittedAt}</td>
+                </tr>
+            `).join('');
+
+            return `
+                <div class="container" style="max-width:1200px;">
+                    <div class="card">
+                        <div class="admin-header">
+                            <div>
+                                <h2>অ্যাডমিন প্যানেল</h2>
+                                <p style="color:#6b7280;">মোট জমা: ${state.submissions.length}টি</p>
+                            </div>
+                            <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding:0; overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>মোবাইল</th>
+                                    <th>সঠিক</th>
+                                    <th>ভুল</th>
+                                    <th>উত্তরহীন</th>
+                                    <th>সময়</th>
+                                    <th>জমার সময়</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows || '<tr><td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">এখনো কোনো জমা নেই</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'start') {
+                app.innerHTML = renderStart();
+            } else if (state.view === 'quiz') {
+                app.innerHTML = renderQuiz();
+            } else if (state.view === 'submitted') {
+                app.innerHTML = renderSubmitted();
+            } else if (state.view === 'admin') {
+                app.innerHTML = renderAdmin();
+            }
+        }
+
+        // Initialize
+        render();
+    </script>
+</body>
+</html>
