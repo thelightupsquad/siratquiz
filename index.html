@@ -68,6 +68,27 @@
             padding-left: 25px;
         }
         
+        .whatsapp-box {
+            background: #dcf8c6;
+            border: 2px solid #25D366;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .whatsapp-box h3 {
+            color: #075e54;
+            margin-bottom: 10px;
+        }
+        
+        .whatsapp-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #25D366;
+            margin: 10px 0;
+        }
+        
         .auto-save-indicator {
             position: fixed;
             top: 20px;
@@ -86,10 +107,6 @@
         
         .auto-save-indicator.show {
             opacity: 1;
-        }
-        
-        .auto-save-indicator.error {
-            background: #ef4444;
         }
         
         .form-group {
@@ -126,6 +143,10 @@
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn:disabled {
@@ -170,6 +191,15 @@
         
         .btn-success:hover {
             background: #047857;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        
+        .btn-whatsapp:hover {
+            background: #128C7E;
         }
         
         .timer-box {
@@ -314,19 +344,6 @@
         .export-buttons button {
             flex: 1;
             min-width: 150px;
-        }
-        
-        .sync-status {
-            background: #f0fdf4;
-            border: 1px solid #86efac;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            color: #065f46;
         }
         
         table {
@@ -520,6 +537,9 @@
     <div id="app"></div>
 
     <script>
+        // WhatsApp নম্বর (এখানে আপনার নম্বর দিন)
+        const WHATSAPP_NUMBER = '+8801886667466'; // এই নম্বরটি পরিবর্তন করুন
+        
         // প্রশ্ন ডাটা
         const QUESTIONS = [
             {
@@ -602,113 +622,58 @@
             timerInterval: null,
             loading: false,
             autoSaveTimeout: null,
-            onlineStorageAvailable: false
+            lastSubmission: null
         };
 
-        // Check if online storage is available
-        function checkOnlineStorage() {
-            state.onlineStorageAvailable = typeof window.storage !== 'undefined';
-            return state.onlineStorageAvailable;
+        // WhatsApp এ পাঠানোর function
+        function sendToWhatsApp(submission) {
+            const message = `
+🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা - নতুন জমা
+
+👤 নাম: ${submission.name}
+📱 মোবাইল: ${submission.phone}
+
+📊 ফলাফল:
+✅ সঠিক উত্তর: ${submission.mcqCorrect}
+❌ ভুল উত্তর: ${submission.mcqWrong}
+⚪ উত্তরহীন: ${submission.mcqUnanswered}
+
+⏱️ সময়: ${submission.timeTaken}
+📅 জমার সময়: ${submission.submittedAt}
+
+---
+সীরাতুন নবী ﷺ প্রতিযোগিতা
+            `.trim();
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+            
+            return whatsappUrl;
         }
 
-        // Online Storage functions
-        async function saveSubmissionOnline(submission) {
-            try {
-                const key = 'submission_' + submission.timestamp + '_' + submission.phone.replace(/\D/g, '').slice(-4);
-                const result = await window.storage.set(key, JSON.stringify(submission), true);
-                
-                if (result) {
-                    console.log('✓ অনলাইন সংরক্ষণ সফল হয়েছে');
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('অনলাইন সংরক্ষণ ব্যর্থ:', error);
-                return false;
-            }
-        }
-
-        async function loadSubmissionsOnline() {
-            try {
-                const result = await window.storage.list('submission_', true);
-                
-                if (result && result.keys) {
-                    const submissions = [];
-                    
-                    for (const key of result.keys) {
-                        try {
-                            const data = await window.storage.get(key, true);
-                            if (data && data.value) {
-                                submissions.push(JSON.parse(data.value));
-                            }
-                        } catch (e) {
-                            console.error('ডাটা লোড করতে সমস্যা:', key);
-                        }
-                    }
-                    
-                    return submissions.sort((a, b) => b.timestamp - a.timestamp);
-                }
-                return [];
-            } catch (error) {
-                console.error('অনলাইন ডাটা লোড ব্যর্থ:', error);
-                return [];
-            }
-        }
-
-        // Local Storage (backup)
-        async function saveSubmissionLocal(submission) {
+        // Storage functions
+        async function saveSubmission(submission) {
             try {
                 const allSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
                 allSubs.push(submission);
                 localStorage.setItem('sirat_subs', JSON.stringify(allSubs));
+                state.lastSubmission = submission;
                 return true;
             } catch (error) {
-                console.error('লোকাল সংরক্ষণ ব্যর্থ:', error);
+                console.error('Save error:', error);
                 return false;
             }
         }
 
-        async function loadSubmissionsLocal() {
+        async function loadSubmissions() {
             try {
-                return JSON.parse(localStorage.getItem('sirat_subs') || '[]');
+                const subs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
+                state.submissions = subs;
+                return subs;
             } catch (error) {
-                console.error('লোকাল ডাটা লোড ব্যর্থ:', error);
+                console.error('Load error:', error);
                 return [];
             }
-        }
-
-        // Combined save (both online and local)
-        async function saveSubmission(submission) {
-            let onlineSaved = false;
-            let localSaved = false;
-
-            // Try online storage first
-            if (checkOnlineStorage()) {
-                onlineSaved = await saveSubmissionOnline(submission);
-            }
-
-            // Always save locally as backup
-            localSaved = await saveSubmissionLocal(submission);
-
-            return onlineSaved || localSaved;
-        }
-
-        // Combined load (prefer online, fallback to local)
-        async function loadSubmissions() {
-            let submissions = [];
-
-            // Try online first
-            if (checkOnlineStorage()) {
-                submissions = await loadSubmissionsOnline();
-            }
-
-            // If no online data, load from local
-            if (submissions.length === 0) {
-                submissions = await loadSubmissionsLocal();
-            }
-
-            state.submissions = submissions;
-            return submissions;
         }
 
         // Auto-save functionality
@@ -724,19 +689,17 @@
                 
                 try {
                     localStorage.setItem('quiz_progress', JSON.stringify(progressData));
-                    showAutoSaveIndicator('সংরক্ষিত', false);
+                    showAutoSaveIndicator('সংরক্ষিত');
                 } catch (e) {
                     console.log('Auto-save failed');
-                    showAutoSaveIndicator('সংরক্ষণ ব্যর্থ', true);
                 }
             }
         }
 
-        function showAutoSaveIndicator(message, isError = false) {
+        function showAutoSaveIndicator(message) {
             const indicator = document.getElementById('autoSaveIndicator');
             if (indicator) {
-                indicator.textContent = isError ? '✗ ' + message : '✓ ' + message;
-                indicator.classList.toggle('error', isError);
+                indicator.textContent = '✓ ' + message;
                 indicator.classList.add('show');
                 setTimeout(() => {
                     indicator.classList.remove('show');
@@ -819,6 +782,27 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Results');
             
             XLSX.writeFile(wb, 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.xlsx');
+        }
+
+        function sendAllToWhatsApp() {
+            if (state.submissions.length === 0) {
+                alert('কোনো ডাটা নেই পাঠানোর জন্য');
+                return;
+            }
+
+            let message = '🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা\n\n';
+            message += `📊 মোট জমা: ${state.submissions.length}টি\n\n`;
+            
+            state.submissions.forEach((sub, idx) => {
+                message += `${idx + 1}. ${sub.name}\n`;
+                message += `   📱 ${sub.phone}\n`;
+                message += `   ✅ ${sub.mcqCorrect} | ❌ ${sub.mcqWrong} | ⚪ ${sub.mcqUnanswered}\n`;
+                message += `   ⏱️ ${sub.timeTaken}\n\n`;
+            });
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
         }
 
         // Format time
@@ -990,19 +974,11 @@
 
         // Render functions
         function renderStart() {
-            const storageStatus = checkOnlineStorage() 
-                ? '🌐 অনলাইন স্টোরেজ সংযুক্ত' 
-                : '💾 লোকাল স্টোরেজ মোড';
-
             return `
                 <div class="container">
                     <div class="card">
                         <h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>
                         <p class="subtitle">রাসূলুল্লাহ ﷺ এর জীবনী নিয়ে জ্ঞান প্রতিযোগিতা</p>
-                        
-                        <div class="sync-status">
-                            <span>${storageStatus}</span>
-                        </div>
                         
                         <div class="info-box">
                             <h3>প্রতিযোগিতার বিবরণ:</h3>
@@ -1011,7 +987,7 @@
                                 <li>⏰ সময়: ১ ঘন্টা (৬০ মিনিট)</li>
                                 <li>✅ একবার শুরু করলে থামানো যাবে না</li>
                                 <li>💾 আপনার উত্তর স্বয়ংক্রিয়ভাবে সংরক্ষিত হবে</li>
-                                <li>🌐 ডাটা অনলাইনে সংরক্ষণ করা হবে</li>
+                                <li>📱 পরীক্ষা শেষে WhatsApp এ ফলাফল পাঠাতে পারবেন</li>
                                 <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
                             </ul>
                         </div>
@@ -1109,20 +1085,46 @@
         }
 
         function renderSubmitted() {
+            const whatsappUrl = sendToWhatsApp(state.lastSubmission);
+            const displayNumber = WHATSAPP_NUMBER.replace('88', '').replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            
             return `
-                <div class="container" style="margin-top:100px;">
+                <div class="container" style="margin-top:50px;">
                     <div class="card">
                         <div class="success-icon">✅</div>
                         <div class="success-message">
                             <h2>জমা সফল হয়েছে!</h2>
                             <p>${state.participant.name}, আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>
-                            <p style="font-weight:bold; color:#065f46; margin-top:20px;">
-                                ${checkOnlineStorage() ? '🌐 ডাটা অনলাইনে সংরক্ষিত হয়েছে।' : '💾 ডাটা লোকালি সংরক্ষিত হয়েছে।'}
-                            </p>
-                            <p style="font-weight:bold; color:#065f46;">
-                                ফলাফল শীঘ্রই ঘোষণা করা হবে ইনশাআল্লাহ।
-                            </p>
-                            <p style="color:#6b7280; margin-top:30px;">
+                            
+                            <div style="margin: 30px 0; padding: 20px; background: #f0fdf4; border-radius: 12px;">
+                                <h3 style="color: #065f46; margin-bottom: 15px;">📊 আপনার ফলাফল:</h3>
+                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
+                                    ✅ সঠিক উত্তর: <strong>${state.lastSubmission.mcqCorrect}</strong>
+                                </p>
+                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
+                                    ❌ ভুল উত্তর: <strong>${state.lastSubmission.mcqWrong}</strong>
+                                </p>
+                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
+                                    ⚪ উত্তরহীন: <strong>${state.lastSubmission.mcqUnanswered}</strong>
+                                </p>
+                                <p style="font-size: 16px; color: #374151; margin: 8px 0;">
+                                    ⏱️ সময়: <strong>${state.lastSubmission.timeTaken}</strong>
+                                </p>
+                            </div>
+
+                            <div class="whatsapp-box">
+                                <h3>📱 WhatsApp এ ফলাফল পাঠান</h3>
+                                <p style="color: #6b7280; margin: 10px 0;">
+                                    আপনার ফলাফল নিচের নম্বরে পাঠান
+                                </p>
+                                <div class="whatsapp-number">${displayNumber}</div>
+                                <button class="btn btn-whatsapp" onclick="window.open('${whatsappUrl}', '_blank')" style="margin-top: 15px;">
+                                    <span style="font-size: 24px;">📱</span>
+                                    WhatsApp এ পাঠান
+                                </button>
+                            </div>
+
+                            <p style="color:#6b7280; margin-top:30px; font-size: 14px;">
                                 আল্লাহ আপনাকে উত্তম প্রতিদান দিন। 🤲
                             </p>
                         </div>
@@ -1135,10 +1137,6 @@
             if (state.loading) {
                 return '<div class="loading">লোড হচ্ছে...</div>';
             }
-            
-            const storageInfo = checkOnlineStorage() 
-                ? '🌐 অনলাইন ডাটা দেখানো হচ্ছে' 
-                : '💾 লোকাল ডাটা দেখানো হচ্ছে';
 
             const rows = state.submissions
                 .sort((a, b) => b.timestamp - a.timestamp)
@@ -1162,12 +1160,14 @@
                             <div>
                                 <h2>অ্যাডমিন প্যানেল</h2>
                                 <p style="color:#6b7280;">মোট জমা: ${state.submissions.length}টি</p>
-                                <p style="color:#6b7280; font-size:14px;">${storageInfo}</p>
                             </div>
                             <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
                         </div>
 
                         <div class="export-buttons">
+                            <button class="btn btn-whatsapp" onclick="sendAllToWhatsApp()">
+                                📱 সব ডাটা WhatsApp এ পাঠান
+                            </button>
                             <button class="btn btn-success" onclick="exportToExcel()">
                                 📊 Excel এ ডাউনলোড করুন
                             </button>
@@ -1216,9 +1216,6 @@
 
         // Initialize
         window.onload = function() {
-            // Check storage availability
-            checkOnlineStorage();
-            
             // Try to load saved progress
             if (!loadProgress()) {
                 render();
