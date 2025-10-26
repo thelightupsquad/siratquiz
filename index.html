@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>সীরাতুন নবী ﷺ প্রতিযোগিতা</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -67,6 +68,30 @@
             padding-left: 25px;
         }
         
+        .auto-save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .auto-save-indicator.show {
+            opacity: 1;
+        }
+        
+        .auto-save-indicator.error {
+            background: #ef4444;
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
@@ -103,12 +128,17 @@
             transition: all 0.3s;
         }
         
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .btn-primary {
             background: #10b981;
             color: white;
         }
         
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: #059669;
             transform: translateY(-2px);
         }
@@ -129,8 +159,17 @@
             color: white;
         }
         
-        .btn-danger:hover {
+        .btn-danger:hover:not(:disabled) {
             background: #dc2626;
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
         }
         
         .timer-box {
@@ -265,6 +304,31 @@
             color: #374151;
         }
         
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .export-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .sync-status {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #065f46;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -333,30 +397,126 @@
             display: none;
         }
         
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
             h1 {
                 font-size: 1.8em;
             }
             
             .card {
                 padding: 20px;
+                border-radius: 15px;
             }
             
             .timer {
                 font-size: 18px;
             }
             
+            .timer-box {
+                padding: 15px;
+            }
+            
+            .question-card {
+                padding: 20px;
+            }
+            
+            .question-text {
+                font-size: 18px;
+            }
+            
+            .option {
+                padding: 15px;
+                font-size: 15px;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .nav-buttons button {
+                width: 100%;
+            }
+            
+            .auto-save-indicator {
+                top: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .export-buttons {
+                flex-direction: column;
+            }
+            
+            .export-buttons button {
+                width: 100%;
+            }
+            
             table {
-                font-size: 14px;
+                font-size: 12px;
             }
             
             th, td {
-                padding: 10px 5px;
+                padding: 8px 4px;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
+            
+            .info-box {
+                padding: 15px;
+            }
+            
+            .info-box li {
+                font-size: 14px;
+            }
+            
+            .question-text {
+                font-size: 16px;
+            }
+            
+            .btn {
+                padding: 15px;
+                font-size: 16px;
+            }
+            
+            .success-icon {
+                font-size: 60px;
+            }
+            
+            .success-message h2 {
+                font-size: 24px;
+            }
+            
+            .success-message p {
+                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
+    <div id="autoSaveIndicator" class="auto-save-indicator">✓ সংরক্ষিত</div>
     <div id="app"></div>
 
     <script>
@@ -440,62 +600,225 @@
             startTime: null,
             submissions: [],
             timerInterval: null,
-            loading: false
+            loading: false,
+            autoSaveTimeout: null,
+            onlineStorageAvailable: false
         };
 
-        // Simple in-memory storage (fallback)
-        let memoryStorage = {};
+        // Check if online storage is available
+        function checkOnlineStorage() {
+            state.onlineStorageAvailable = typeof window.storage !== 'undefined';
+            return state.onlineStorageAvailable;
+        }
 
-        // Storage functions
-        async function saveSubmission(submission) {
+        // Online Storage functions
+        async function saveSubmissionOnline(submission) {
             try {
-                const timestamp = Date.now();
-                const key = 'sub_' + timestamp + '_' + submission.phone.replace(/\D/g, '');
-                memoryStorage[key] = submission;
+                const key = 'submission_' + submission.timestamp + '_' + submission.phone.replace(/\D/g, '').slice(-4);
+                const result = await window.storage.set(key, JSON.stringify(submission), true);
                 
-                // Also save to localStorage as backup
-                try {
-                    const allSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
-                    allSubs.push(submission);
-                    localStorage.setItem('sirat_subs', JSON.stringify(allSubs));
-                } catch(e) {
-                    console.log('localStorage not available');
+                if (result) {
+                    console.log('✓ অনলাইন সংরক্ষণ সফল হয়েছে');
+                    return true;
                 }
-                
-                return true;
+                return false;
             } catch (error) {
-                console.error('Save error:', error);
+                console.error('অনলাইন সংরক্ষণ ব্যর্থ:', error);
                 return false;
             }
         }
 
-        async function loadSubmissions() {
+        async function loadSubmissionsOnline() {
             try {
-                // Load from memory
-                const memorySubs = Object.values(memoryStorage);
+                const result = await window.storage.list('submission_', true);
                 
-                // Load from localStorage
-                let localSubs = [];
-                try {
-                    localSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
-                } catch(e) {
-                    console.log('localStorage not available');
+                if (result && result.keys) {
+                    const submissions = [];
+                    
+                    for (const key of result.keys) {
+                        try {
+                            const data = await window.storage.get(key, true);
+                            if (data && data.value) {
+                                submissions.push(JSON.parse(data.value));
+                            }
+                        } catch (e) {
+                            console.error('ডাটা লোড করতে সমস্যা:', key);
+                        }
+                    }
+                    
+                    return submissions.sort((a, b) => b.timestamp - a.timestamp);
                 }
-                
-                // Merge and deduplicate
-                const allSubs = [...memorySubs, ...localSubs];
-                const uniqueSubs = {};
-                allSubs.forEach(sub => {
-                    const key = sub.phone + '_' + sub.submittedAt;
-                    uniqueSubs[key] = sub;
-                });
-                
-                state.submissions = Object.values(uniqueSubs);
-                return state.submissions;
+                return [];
             } catch (error) {
-                console.error('Load error:', error);
+                console.error('অনলাইন ডাটা লোড ব্যর্থ:', error);
                 return [];
             }
+        }
+
+        // Local Storage (backup)
+        async function saveSubmissionLocal(submission) {
+            try {
+                const allSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
+                allSubs.push(submission);
+                localStorage.setItem('sirat_subs', JSON.stringify(allSubs));
+                return true;
+            } catch (error) {
+                console.error('লোকাল সংরক্ষণ ব্যর্থ:', error);
+                return false;
+            }
+        }
+
+        async function loadSubmissionsLocal() {
+            try {
+                return JSON.parse(localStorage.getItem('sirat_subs') || '[]');
+            } catch (error) {
+                console.error('লোকাল ডাটা লোড ব্যর্থ:', error);
+                return [];
+            }
+        }
+
+        // Combined save (both online and local)
+        async function saveSubmission(submission) {
+            let onlineSaved = false;
+            let localSaved = false;
+
+            // Try online storage first
+            if (checkOnlineStorage()) {
+                onlineSaved = await saveSubmissionOnline(submission);
+            }
+
+            // Always save locally as backup
+            localSaved = await saveSubmissionLocal(submission);
+
+            return onlineSaved || localSaved;
+        }
+
+        // Combined load (prefer online, fallback to local)
+        async function loadSubmissions() {
+            let submissions = [];
+
+            // Try online first
+            if (checkOnlineStorage()) {
+                submissions = await loadSubmissionsOnline();
+            }
+
+            // If no online data, load from local
+            if (submissions.length === 0) {
+                submissions = await loadSubmissionsLocal();
+            }
+
+            state.submissions = submissions;
+            return submissions;
+        }
+
+        // Auto-save functionality
+        function autoSave() {
+            if (state.view === 'quiz') {
+                const progressData = {
+                    participant: state.participant,
+                    answers: state.answers,
+                    currentQuestion: state.currentQuestion,
+                    timeLeft: state.timeLeft,
+                    startTime: state.startTime
+                };
+                
+                try {
+                    localStorage.setItem('quiz_progress', JSON.stringify(progressData));
+                    showAutoSaveIndicator('সংরক্ষিত', false);
+                } catch (e) {
+                    console.log('Auto-save failed');
+                    showAutoSaveIndicator('সংরক্ষণ ব্যর্থ', true);
+                }
+            }
+        }
+
+        function showAutoSaveIndicator(message, isError = false) {
+            const indicator = document.getElementById('autoSaveIndicator');
+            if (indicator) {
+                indicator.textContent = isError ? '✗ ' + message : '✓ ' + message;
+                indicator.classList.toggle('error', isError);
+                indicator.classList.add('show');
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('quiz_progress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (confirm('আপনার আগের প্রগ্রেস পাওয়া গেছে। এটি চালিয়ে যেতে চান?')) {
+                        state.participant = data.participant;
+                        state.answers = data.answers;
+                        state.currentQuestion = data.currentQuestion;
+                        state.timeLeft = data.timeLeft;
+                        state.startTime = new Date(data.startTime);
+                        state.view = 'quiz';
+                        startTimer();
+                        render();
+                        return true;
+                    } else {
+                        localStorage.removeItem('quiz_progress');
+                    }
+                }
+            } catch (e) {
+                console.log('Could not load progress');
+            }
+            return false;
+        }
+
+        function clearProgress() {
+            try {
+                localStorage.removeItem('quiz_progress');
+            } catch (e) {
+                console.log('Could not clear progress');
+            }
+        }
+
+        // Export functions
+        function exportToCSV() {
+            if (state.submissions.length === 0) {
+                alert('কোনো ডাটা নেই এক্সপোর্ট করার জন্য');
+                return;
+            }
+
+            let csv = 'নাম,মোবাইল,সঠিক উত্তর,ভুল উত্তর,উত্তরহীন,সময়,জমার তারিখ\n';
+            
+            state.submissions.forEach(sub => {
+                csv += `"${sub.name}","${sub.phone}",${sub.mcqCorrect},${sub.mcqWrong},${sub.mcqUnanswered},"${sub.timeTaken}","${sub.submittedAt}"\n`;
+            });
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.csv';
+            link.click();
+        }
+
+        function exportToExcel() {
+            if (state.submissions.length === 0) {
+                alert('কোনো ডাটা নেই এক্সপোর্ট করার জন্য');
+                return;
+            }
+
+            const data = state.submissions.map((sub, idx) => ({
+                'ক্রমিক': idx + 1,
+                'নাম': sub.name,
+                'মোবাইল': sub.phone,
+                'সঠিক উত্তর': sub.mcqCorrect,
+                'ভুল উত্তর': sub.mcqWrong,
+                'উত্তরহীন': sub.mcqUnanswered,
+                'সময়': sub.timeTaken,
+                'জমার তারিখ': sub.submittedAt
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Results');
+            
+            XLSX.writeFile(wb, 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.xlsx');
         }
 
         // Format time
@@ -519,6 +842,7 @@
             state.startTime = new Date();
             state.view = 'quiz';
             startTimer();
+            autoSave();
             render();
         }
 
@@ -530,6 +854,11 @@
                     submitQuiz();
                 }
                 updateTimer();
+                
+                // Auto-save every 30 seconds
+                if (state.timeLeft % 30 === 0) {
+                    autoSave();
+                }
             }, 1000);
         }
 
@@ -582,16 +911,24 @@
                 timestamp: Date.now()
             };
 
-            await saveSubmission(submission);
+            const saved = await saveSubmission(submission);
             
-            state.loading = false;
-            state.view = 'submitted';
+            if (saved) {
+                clearProgress();
+                state.loading = false;
+                state.view = 'submitted';
+            } else {
+                state.loading = false;
+                alert('জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+            }
+            
             render();
         }
 
         // Answer functions
         function selectAnswer(questionId, answerIndex) {
             state.answers[questionId] = answerIndex;
+            autoSave();
             render();
         }
 
@@ -599,6 +936,14 @@
             const el = document.getElementById('shortAnswer');
             if (el) {
                 state.answers[questionId] = el.value;
+                
+                // Debounced auto-save
+                if (state.autoSaveTimeout) {
+                    clearTimeout(state.autoSaveTimeout);
+                }
+                state.autoSaveTimeout = setTimeout(() => {
+                    autoSave();
+                }, 1000);
             }
         }
 
@@ -606,6 +951,7 @@
         function nextQuestion() {
             if (state.currentQuestion < QUESTIONS.length - 1) {
                 state.currentQuestion++;
+                autoSave();
                 render();
             }
         }
@@ -644,18 +990,28 @@
 
         // Render functions
         function renderStart() {
+            const storageStatus = checkOnlineStorage() 
+                ? '🌐 অনলাইন স্টোরেজ সংযুক্ত' 
+                : '💾 লোকাল স্টোরেজ মোড';
+
             return `
                 <div class="container">
                     <div class="card">
                         <h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>
                         <p class="subtitle">রাসূলুল্লাহ ﷺ এর জীবনী নিয়ে জ্ঞান প্রতিযোগিতা</p>
                         
+                        <div class="sync-status">
+                            <span>${storageStatus}</span>
+                        </div>
+                        
                         <div class="info-box">
                             <h3>প্রতিযোগিতার বিবরণ:</h3>
                             <ul>
-                                <li>📝 মোট প্রশ্ন: ১০০টি (৯০টি MCQ + ১০টি সংক্ষিপ্ত)</li>
+                                <li>📝 মোট প্রশ্ন: ১০টি (৮টি MCQ + ২টি সংক্ষিপ্ত)</li>
                                 <li>⏰ সময়: ১ ঘন্টা (৬০ মিনিট)</li>
                                 <li>✅ একবার শুরু করলে থামানো যাবে না</li>
+                                <li>💾 আপনার উত্তর স্বয়ংক্রিয়ভাবে সংরক্ষিত হবে</li>
+                                <li>🌐 ডাটা অনলাইনে সংরক্ষণ করা হবে</li>
                                 <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
                             </ul>
                         </div>
@@ -761,6 +1117,9 @@
                             <h2>জমা সফল হয়েছে!</h2>
                             <p>${state.participant.name}, আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>
                             <p style="font-weight:bold; color:#065f46; margin-top:20px;">
+                                ${checkOnlineStorage() ? '🌐 ডাটা অনলাইনে সংরক্ষিত হয়েছে।' : '💾 ডাটা লোকালি সংরক্ষিত হয়েছে।'}
+                            </p>
+                            <p style="font-weight:bold; color:#065f46;">
                                 ফলাফল শীঘ্রই ঘোষণা করা হবে ইনশাআল্লাহ।
                             </p>
                             <p style="color:#6b7280; margin-top:30px;">
@@ -777,6 +1136,10 @@
                 return '<div class="loading">লোড হচ্ছে...</div>';
             }
             
+            const storageInfo = checkOnlineStorage() 
+                ? '🌐 অনলাইন ডাটা দেখানো হচ্ছে' 
+                : '💾 লোকাল ডাটা দেখানো হচ্ছে';
+
             const rows = state.submissions
                 .sort((a, b) => b.timestamp - a.timestamp)
                 .map((sub, idx) => `
@@ -799,8 +1162,18 @@
                             <div>
                                 <h2>অ্যাডমিন প্যানেল</h2>
                                 <p style="color:#6b7280;">মোট জমা: ${state.submissions.length}টি</p>
+                                <p style="color:#6b7280; font-size:14px;">${storageInfo}</p>
                             </div>
                             <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
+                        </div>
+
+                        <div class="export-buttons">
+                            <button class="btn btn-success" onclick="exportToExcel()">
+                                📊 Excel এ ডাউনলোড করুন
+                            </button>
+                            <button class="btn btn-primary" onclick="exportToCSV()">
+                                📄 CSV এ ডাউনলোড করুন
+                            </button>
                         </div>
                     </div>
 
@@ -842,7 +1215,15 @@
         }
 
         // Initialize
-        render();
+        window.onload = function() {
+            // Check storage availability
+            checkOnlineStorage();
+            
+            // Try to load saved progress
+            if (!loadProgress()) {
+                render();
+            }
+        };
     </script>
 </body>
 </html>
