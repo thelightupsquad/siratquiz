@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>সীরাতুন নবী ﷺ প্রতিযোগিতা</title>
+    <title>সীরাতুন নবী ﷺ প্রতিযোগিতা v2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
@@ -85,7 +85,7 @@
         }
         
         .verification-code {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             color: white;
             letter-spacing: 1px;
@@ -141,9 +141,8 @@
             padding: 15px;
             border: 2px solid #3b82f6;
             border-radius: 10px;
-            font-size: 18px;
+            font-size: 14px;
             text-transform: none;
-            letter-spacing: 0px;
             font-family: 'Courier New', monospace;
             word-break: break-all;
         }
@@ -521,8 +520,6 @@
             
             .verification-code {
                 font-size: 14px;
-                letter-spacing: 0px;
-                word-break: break-all;
             }
             
             .timer {
@@ -637,6 +634,8 @@
     <div id="app"></div>
 
     <script>
+        console.log('=== SCRIPT LOADED - VERSION 2.0 ===');
+        
         // WhatsApp নম্বর (এখানে আপনার নম্বর দিন)
         const WHATSAPP_NUMBER = '8801712345678'; // এই নম্বরটি পরিবর্তন করুন
         
@@ -650,205 +649,131 @@
             return map[char];
         }
         
-        // Base64 encode/decode functions (UTF-8 safe)
+        // Base64 encode/decode functions
         function base64Encode(str) {
+            console.log('[BASE64-ENCODE] Input:', str);
             try {
-                console.log('[BASE64] Encoding:', str);
-                // Convert to UTF-8 bytes then to base64
                 const utf8Bytes = new TextEncoder().encode(str);
                 let binary = '';
                 utf8Bytes.forEach(byte => binary += String.fromCharCode(byte));
                 const result = btoa(binary);
-                console.log('[BASE64] Encoded result:', result);
+                console.log('[BASE64-ENCODE] Output:', result);
                 return result;
             } catch (e) {
-                console.error('[BASE64] Encode error:', e);
+                console.error('[BASE64-ENCODE] Error:', e);
                 return '';
             }
         }
         
         function base64Decode(str) {
+            console.log('[BASE64-DECODE] Input:', str);
             try {
-                console.log('[BASE64] Decoding:', str);
-                // Decode base64 then convert from UTF-8 bytes
                 const binary = atob(str);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) {
                     bytes[i] = binary.charCodeAt(i);
                 }
                 const result = new TextDecoder().decode(bytes);
-                console.log('[BASE64] Decoded result:', result);
+                console.log('[BASE64-DECODE] Output:', result);
                 return result;
             } catch (e) {
-                console.error('[BASE64] Decode error:', e, 'for string:', str);
+                console.error('[BASE64-DECODE] Error:', e);
                 return null;
             }
         }
         
-        // Generate verification code with ALL information encoded
+        // Generate verification code
         function generateVerificationCode(correct, wrong, unanswered, phone, name, timeTaken) {
-            // Part 1: Encode name and phone (Base64)
+            console.log('[GEN-CODE] Inputs:', {correct, wrong, unanswered, phone, name, timeTaken});
+            
+            // Part 1: Encode name and phone
             const namePhone = `${name}|${phone}`;
             const encodedNamePhone = base64Encode(namePhone);
             
-            // Part 2: Result code (BACKGROUND encoding)
+            // Part 2: Result code
             const c = ENCODE_MAP[correct] || 'B';
             const w = ENCODE_MAP[wrong] || 'B';
             const u = ENCODE_MAP[unanswered] || 'B';
             const resultCode = `${c}${w}${u}`;
             
-            // Part 3: Time code (মিনিট এবং সেকেন্ড encode)
+            // Part 3: Time code
             const timeMatch = timeTaken.match(/(\d+):(\d+)/);
             if (timeMatch) {
                 const mins = parseInt(timeMatch[1]);
                 const secs = parseInt(timeMatch[2]);
                 
-                // মিনিট encode (2 digit)
                 const min1 = ENCODE_MAP[Math.floor(mins / 10)] || 'B';
                 const min2 = ENCODE_MAP[mins % 10] || 'B';
-                
-                // সেকেন্ড encode (2 digit)
                 const sec1 = ENCODE_MAP[Math.floor(secs / 10)] || 'B';
                 const sec2 = ENCODE_MAP[secs % 10] || 'B';
                 
                 const timeCode = `${min1}${min2}${sec1}${sec2}`;
+                const finalCode = `${encodedNamePhone}-${resultCode}-${timeCode}`;
                 
-                // Final format: ENCODED_NAME_PHONE-RESULT-TIME
-                return `${encodedNamePhone}-${resultCode}-${timeCode}`;
+                console.log('[GEN-CODE] Generated code:', finalCode);
+                return finalCode;
             }
             
             return `${encodedNamePhone}-${resultCode}-BBBB`;
         }
         
-        // Decode verification code to get all information
+        // Decode verification code
         function decodeVerificationCode(code) {
+            console.log('[DECODE-CODE] Input:', code);
+            
             try {
-                console.log('[DECODE] Starting decode for:', code);
-                
                 const parts = code.split('-');
-                console.log('[DECODE] Split parts:', parts, 'Length:', parts.length);
+                console.log('[DECODE-CODE] Parts:', parts);
                 
                 if (parts.length !== 3) {
-                    console.log('[DECODE] Invalid parts length:', parts.length);
+                    console.error('[DECODE-CODE] Invalid parts length');
                     return null;
                 }
                 
-                // Part 1: Decode name and phone
-                console.log('[DECODE] Part 0 (base64):', parts[0]);
+                // Decode name and phone
                 const namePhone = base64Decode(parts[0]);
-                console.log('[DECODE] Decoded namePhone:', namePhone);
+                console.log('[DECODE-CODE] Decoded namePhone:', namePhone);
                 
-                if (!namePhone) {
-                    console.log('[DECODE] Failed to decode namePhone');
+                if (!namePhone || !namePhone.includes('|')) {
+                    console.error('[DECODE-CODE] Invalid namePhone format');
                     return null;
                 }
                 
-                const nameParts = namePhone.split('|');
-                console.log('[DECODE] Split nameParts:', nameParts, 'Length:', nameParts.length);
+                const [decodedName, decodedPhone] = namePhone.split('|');
+                console.log('[DECODE-CODE] Name:', decodedName, 'Phone:', decodedPhone);
                 
-                if (nameParts.length !== 2) {
-                    console.log('[DECODE] Invalid nameParts length:', nameParts.length);
-                    return null;
-                }
+                // Decode result
+                const correct = decodeChar(parts[1][0]) || 0;
+                const wrong = decodeChar(parts[1][1]) || 0;
+                const unanswered = decodeChar(parts[1][2]) || 0;
+                console.log('[DECODE-CODE] Results:', {correct, wrong, unanswered});
                 
-                const name = nameParts[0];
-                const phone = nameParts[1];
-                console.log('[DECODE] Name:', name, 'Phone:', phone);
-                
-                // Part 2: Decode result
-                const resultPart = parts[1];
-                console.log('[DECODE] Result part:', resultPart);
-                
-                if (resultPart.length !== 3) {
-                    console.log('[DECODE] Invalid result part length:', resultPart.length);
-                    return null;
-                }
-                
-                const correct = decodeChar(resultPart[0]);
-                const wrong = decodeChar(resultPart[1]);
-                const unanswered = decodeChar(resultPart[2]);
-                console.log('[DECODE] Results - Correct:', correct, 'Wrong:', wrong, 'Unanswered:', unanswered);
-                
-                if (correct === undefined || wrong === undefined || unanswered === undefined) {
-                    console.log('[DECODE] Invalid result chars');
-                    return null;
-                }
-                
-                // Part 3: Decode time
-                const timePart = parts[2];
-                console.log('[DECODE] Time part:', timePart);
-                
-                if (timePart.length !== 4) {
-                    console.log('[DECODE] Invalid time part length:', timePart.length);
-                    return null;
-                }
-                
-                const min1 = decodeChar(timePart[0]);
-                const min2 = decodeChar(timePart[1]);
-                const sec1 = decodeChar(timePart[2]);
-                const sec2 = decodeChar(timePart[3]);
-                console.log('[DECODE] Time digits - min1:', min1, 'min2:', min2, 'sec1:', sec1, 'sec2:', sec2);
-                
-                if (min1 === undefined || min2 === undefined || 
-                    sec1 === undefined || sec2 === undefined) {
-                    console.log('[DECODE] Invalid time chars');
-                    return null;
-                }
+                // Decode time
+                const min1 = decodeChar(parts[2][0]) || 0;
+                const min2 = decodeChar(parts[2][1]) || 0;
+                const sec1 = decodeChar(parts[2][2]) || 0;
+                const sec2 = decodeChar(parts[2][3]) || 0;
                 
                 const minutes = (min1 * 10) + min2;
                 const seconds = (sec1 * 10) + sec2;
-                const time = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                console.log('[DECODE] Final time:', time);
+                const decodedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                console.log('[DECODE-CODE] Time:', decodedTime);
                 
                 const result = {
-                    name: name,
-                    phone: phone,
+                    name: decodedName,
+                    phone: decodedPhone,
                     correct: correct,
                     wrong: wrong,
                     unanswered: unanswered,
-                    time: time,
+                    time: decodedTime,
                     code: code
                 };
                 
-                console.log('[DECODE] Successfully decoded, returning:', result);
+                console.log('[DECODE-CODE] Final result:', result);
                 return result;
+                
             } catch (e) {
-                console.error('[DECODE] Error:', e);
-                return null;
-            }
-        }
-        
-        // Decode verification code
-        function decodeVerificationCode(code) {
-            try {
-                // Format: R1-CWU-R2PHONE
-                // উদাহরণ: K-OCB-G45
-                const parts = code.toUpperCase().split('-');
-                if (parts.length !== 3) {
-                    return null;
-                }
-                
-                // মাঝের অংশ থেকে result নিব
-                const resultPart = parts[1]; // যেমন: OCB
-                if (resultPart.length !== 3) {
-                    return null;
-                }
-                
-                const correct = decodeChar(resultPart[0]);
-                const wrong = decodeChar(resultPart[1]);
-                const unanswered = decodeChar(resultPart[2]);
-                
-                if (correct === undefined || wrong === undefined || unanswered === undefined) {
-                    return null;
-                }
-                
-                return {
-                    correct: correct,
-                    wrong: wrong,
-                    unanswered: unanswered,
-                    code: code
-                };
-            } catch (e) {
+                console.error('[DECODE-CODE] Exception:', e);
                 return null;
             }
         }
@@ -938,22 +863,20 @@
             lastSubmission: null
         };
 
-        // WhatsApp এ পাঠানোর function
+        // WhatsApp function
         function sendToWhatsApp(submission) {
             const message = `
 🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা
 
 👤 নাম: ${submission.name}
 📱 মোবাইল: ${submission.phone}
-🔐 Verification Code: ${submission.verificationCode}
+🔐 Code: ${submission.verificationCode}
 
 আমার পরীক্ষা সম্পন্ন হয়েছে।
             `.trim();
 
             const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-            
-            return whatsappUrl;
+            return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
         }
 
         // Storage functions
@@ -981,7 +904,7 @@
             }
         }
 
-        // Auto-save functionality
+        // Auto-save
         function autoSave() {
             if (state.view === 'quiz') {
                 const progressData = {
@@ -1090,14 +1013,12 @@
             XLSX.writeFile(wb, 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.xlsx');
         }
 
-        // Format time
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
         }
 
-        // Start quiz
         function startQuiz() {
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
@@ -1115,7 +1036,6 @@
             render();
         }
 
-        // Timer
         function startTimer() {
             state.timerInterval = setInterval(() => {
                 state.timeLeft--;
@@ -1124,7 +1044,6 @@
                 }
                 updateTimer();
                 
-                // Auto-save every 30 seconds
                 if (state.timeLeft % 30 === 0) {
                     autoSave();
                 }
@@ -1136,7 +1055,6 @@
             if (el) el.textContent = formatTime(state.timeLeft);
         }
 
-        // Submit quiz
         async function submitQuiz() {
             if (state.timerInterval) {
                 clearInterval(state.timerInterval);
@@ -1163,7 +1081,6 @@
 
             const unanswered = mcqs.length - correct - wrong;
             
-            // Generate verification code
             const verificationCode = generateVerificationCode(
                 correct, 
                 wrong, 
@@ -1207,7 +1124,6 @@
             render();
         }
 
-        // Answer functions
         function selectAnswer(questionId, answerIndex) {
             state.answers[questionId] = answerIndex;
             autoSave();
@@ -1219,7 +1135,6 @@
             if (el) {
                 state.answers[questionId] = el.value;
                 
-                // Debounced auto-save
                 if (state.autoSaveTimeout) {
                     clearTimeout(state.autoSaveTimeout);
                 }
@@ -1229,7 +1144,6 @@
             }
         }
 
-        // Navigation
         function nextQuestion() {
             if (state.currentQuestion < QUESTIONS.length - 1) {
                 state.currentQuestion++;
@@ -1270,7 +1184,6 @@
             }
         }
 
-        // Decode function for admin
         function decodeCode() {
             const input = document.getElementById('decodeInput');
             const result = document.getElementById('decodeResult');
@@ -1283,21 +1196,12 @@
                 return;
             }
             
-            console.log('=== DECODING START ===');
-            console.log('Original code:', code);
+            console.log('=== DECODE BUTTON CLICKED ===');
+            console.log('Code:', code);
             
             const decoded = decodeVerificationCode(code);
             
-            console.log('Decoded result:', decoded);
-            if (decoded) {
-                console.log('Name:', decoded.name);
-                console.log('Phone:', decoded.phone);
-                console.log('Correct:', decoded.correct);
-                console.log('Wrong:', decoded.wrong);
-                console.log('Unanswered:', decoded.unanswered);
-                console.log('Time:', decoded.time);
-            }
-            console.log('=== DECODING END ===');
+            console.log('Decoded:', decoded);
             
             if (decoded && decoded.name && decoded.phone) {
                 result.innerHTML = `
@@ -1305,10 +1209,10 @@
                         <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Successfully Decoded!</h4>
                     </div>
                     <div class="result-item">
-                        <strong>👤 নাম:</strong> ${decoded.name || 'N/A'}
+                        <strong>👤 নাম:</strong> ${decoded.name}
                     </div>
                     <div class="result-item">
-                        <strong>📱 মোবাইল:</strong> ${decoded.phone || 'N/A'}
+                        <strong>📱 মোবাইল:</strong> ${decoded.phone}
                     </div>
                     <div class="result-item">
                         <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
@@ -1320,7 +1224,7 @@
                         <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
                     </div>
                     <div class="result-item">
-                        <strong>⏱️ সময়:</strong> ${decoded.time || 'N/A'}
+                        <strong>⏱️ সময়:</strong> ${decoded.time}
                     </div>
                     <div class="result-item">
                         <strong>🔐 Code:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 5px 10px; border-radius: 5px; word-break: break-all;">${decoded.code}</span>
@@ -1332,7 +1236,6 @@
                     <div style="background: #fee2e2; padding: 15px; border-radius: 10px;">
                         <h4 style="color: #991b1b; margin-bottom: 10px;">❌ Decode Failed!</h4>
                         <p style="color: #991b1b;">Code decode হতে পারেনি। Console দেখুন বিস্তারিত error এর জন্য।</p>
-                        ${decoded ? `<p style="margin-top:10px; color:#991b1b; font-size:14px;">Name: ${decoded.name}, Phone: ${decoded.phone}</p>` : ''}
                     </div>
                 `;
                 result.classList.add('show');
@@ -1475,7 +1378,7 @@
                                 <p style="color: #6b7280; margin: 10px 0;">
                                     নিচের বাটনে ক্লিক করে আপনার Code পাঠান
                                 </p>
-                                <div class="whatsapp-number">${displayNumber}</div>
+                                <div class="whatsapp-number" style="font-weight: bold; color: #25D366; font-size: 18px; margin: 10px 0;">${displayNumber}</div>
                                 <button class="btn btn-whatsapp" onclick="window.open('${whatsappUrl}', '_blank')" style="margin-top: 15px;">
                                     <span style="font-size: 24px;">📱</span>
                                     WhatsApp এ পাঠান
@@ -1503,7 +1406,7 @@
                         <td>${idx + 1}</td>
                         <td>${sub.name}</td>
                         <td>${sub.phone}</td>
-                        <td style="font-family: monospace;">${sub.verificationCode}</td>
+                        <td style="font-family: monospace; font-size: 11px; word-break: break-all;">${sub.verificationCode}</td>
                         <td><span class="badge badge-green">${sub.mcqCorrect}</span></td>
                         <td><span class="badge badge-red">${sub.mcqWrong}</span></td>
                         <td><span class="badge badge-gray">${sub.mcqUnanswered}</span></td>
@@ -1523,18 +1426,16 @@
                             <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
                         </div>
 
-                                                    <div class="decoder-box">
+                        <div class="decoder-box">
                             <h3>🔍 Verification Code Decoder</h3>
                             <p style="color: #6b7280; margin-bottom: 10px;">
                                 Code পেস্ট করুন - এতে নাম, ফোন, result, সময় সব encoded আছে
                             </p>
                             <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">
-                                📌 Format: EncodedNamePhone-ResultCode-TimeCode<br>
-                                📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9<br>
-                                📌 Console খুলে error দেখুন (F12 চাপুন)
+                                📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
                             </p>
                             <div class="decode-input">
-                                <input type="text" id="decodeInput" placeholder="Code এখানে paste করুন..." style="font-size: 14px; text-transform: none;">
+                                <input type="text" id="decodeInput" placeholder="Code এখানে paste করুন...">
                                 <button class="btn btn-decode" onclick="decodeCode()">Decode</button>
                             </div>
                             <div id="decodeResult" class="decode-result"></div>
@@ -1590,7 +1491,7 @@
 
         // Initialize
         window.onload = function() {
-            // Try to load saved progress
+            console.log('=== APP INITIALIZED - V2.0 ===');
             if (!loadProgress()) {
                 render();
             }
