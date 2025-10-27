@@ -653,28 +653,34 @@
         // Base64 encode/decode functions (UTF-8 safe)
         function base64Encode(str) {
             try {
+                console.log('[BASE64] Encoding:', str);
                 // Convert to UTF-8 bytes then to base64
                 const utf8Bytes = new TextEncoder().encode(str);
                 let binary = '';
                 utf8Bytes.forEach(byte => binary += String.fromCharCode(byte));
-                return btoa(binary);
+                const result = btoa(binary);
+                console.log('[BASE64] Encoded result:', result);
+                return result;
             } catch (e) {
-                console.error('Encode error:', e);
+                console.error('[BASE64] Encode error:', e);
                 return '';
             }
         }
         
         function base64Decode(str) {
             try {
+                console.log('[BASE64] Decoding:', str);
                 // Decode base64 then convert from UTF-8 bytes
                 const binary = atob(str);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) {
                     bytes[i] = binary.charCodeAt(i);
                 }
-                return new TextDecoder().decode(bytes);
+                const result = new TextDecoder().decode(bytes);
+                console.log('[BASE64] Decoded result:', result);
+                return result;
             } catch (e) {
-                console.error('Decode error:', e, 'for string:', str);
+                console.error('[BASE64] Decode error:', e, 'for string:', str);
                 return null;
             }
         }
