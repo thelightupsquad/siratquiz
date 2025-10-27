@@ -638,7 +638,7 @@
 
     <script>
         // WhatsApp নম্বর (এখানে আপনার নম্বর দিন)
-        const WHATSAPP_NUMBER = '+8801886667466'; // এই নম্বরটি পরিবর্তন করুন
+        const WHATSAPP_NUMBER = '8801712345678'; // এই নম্বরটি পরিবর্তন করুন
         
         // Encoding/Decoding system - BACKGROUND mapping
         // B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
@@ -1261,18 +1261,32 @@
                 return;
             }
             
+            console.log('=== DECODING START ===');
+            console.log('Original code:', code);
+            
             const decoded = decodeVerificationCode(code);
             
+            console.log('Decoded result:', decoded);
             if (decoded) {
+                console.log('Name:', decoded.name);
+                console.log('Phone:', decoded.phone);
+                console.log('Correct:', decoded.correct);
+                console.log('Wrong:', decoded.wrong);
+                console.log('Unanswered:', decoded.unanswered);
+                console.log('Time:', decoded.time);
+            }
+            console.log('=== DECODING END ===');
+            
+            if (decoded && decoded.name && decoded.phone) {
                 result.innerHTML = `
                     <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                         <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Successfully Decoded!</h4>
                     </div>
                     <div class="result-item">
-                        <strong>👤 নাম:</strong> ${decoded.name}
+                        <strong>👤 নাম:</strong> ${decoded.name || 'N/A'}
                     </div>
                     <div class="result-item">
-                        <strong>📱 মোবাইল:</strong> ${decoded.phone}
+                        <strong>📱 মোবাইল:</strong> ${decoded.phone || 'N/A'}
                     </div>
                     <div class="result-item">
                         <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
@@ -1284,18 +1298,19 @@
                         <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
                     </div>
                     <div class="result-item">
-                        <strong>⏱️ সময়:</strong> ${decoded.time}
+                        <strong>⏱️ সময়:</strong> ${decoded.time || 'N/A'}
                     </div>
                     <div class="result-item">
-                        <strong>🔐 Code:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 5px 10px; border-radius: 5px;">${decoded.code}</span>
+                        <strong>🔐 Code:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 5px 10px; border-radius: 5px; word-break: break-all;">${decoded.code}</span>
                     </div>
                 `;
                 result.classList.add('show');
             } else {
                 result.innerHTML = `
                     <div style="background: #fee2e2; padding: 15px; border-radius: 10px;">
-                        <h4 style="color: #991b1b; margin-bottom: 10px;">❌ Invalid Code!</h4>
-                        <p style="color: #991b1b;">এই Code টি সঠিক নয়। দয়া করে আবার চেষ্টা করুন।</p>
+                        <h4 style="color: #991b1b; margin-bottom: 10px;">❌ Decode Failed!</h4>
+                        <p style="color: #991b1b;">Code decode হতে পারেনি। Console দেখুন বিস্তারিত error এর জন্য।</p>
+                        ${decoded ? `<p style="margin-top:10px; color:#991b1b; font-size:14px;">Name: ${decoded.name}, Phone: ${decoded.phone}</p>` : ''}
                     </div>
                 `;
                 result.classList.add('show');
