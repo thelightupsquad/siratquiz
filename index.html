@@ -717,50 +717,63 @@
         // Decode verification code to get all information
         function decodeVerificationCode(code) {
             try {
+                console.log('[DECODE] Starting decode for:', code);
+                
                 const parts = code.split('-');
+                console.log('[DECODE] Split parts:', parts, 'Length:', parts.length);
+                
                 if (parts.length !== 3) {
-                    console.log('Invalid parts length:', parts.length);
+                    console.log('[DECODE] Invalid parts length:', parts.length);
                     return null;
                 }
                 
                 // Part 1: Decode name and phone
+                console.log('[DECODE] Part 0 (base64):', parts[0]);
                 const namePhone = base64Decode(parts[0]);
-                console.log('Decoded namePhone:', namePhone);
+                console.log('[DECODE] Decoded namePhone:', namePhone);
                 
                 if (!namePhone) {
-                    console.log('Failed to decode namePhone');
+                    console.log('[DECODE] Failed to decode namePhone');
                     return null;
                 }
                 
                 const nameParts = namePhone.split('|');
+                console.log('[DECODE] Split nameParts:', nameParts, 'Length:', nameParts.length);
+                
                 if (nameParts.length !== 2) {
-                    console.log('Invalid nameParts:', nameParts);
+                    console.log('[DECODE] Invalid nameParts length:', nameParts.length);
                     return null;
                 }
                 
                 const name = nameParts[0];
                 const phone = nameParts[1];
+                console.log('[DECODE] Name:', name, 'Phone:', phone);
                 
                 // Part 2: Decode result
                 const resultPart = parts[1];
+                console.log('[DECODE] Result part:', resultPart);
+                
                 if (resultPart.length !== 3) {
-                    console.log('Invalid result part length:', resultPart.length);
+                    console.log('[DECODE] Invalid result part length:', resultPart.length);
                     return null;
                 }
                 
                 const correct = decodeChar(resultPart[0]);
                 const wrong = decodeChar(resultPart[1]);
                 const unanswered = decodeChar(resultPart[2]);
+                console.log('[DECODE] Results - Correct:', correct, 'Wrong:', wrong, 'Unanswered:', unanswered);
                 
                 if (correct === undefined || wrong === undefined || unanswered === undefined) {
-                    console.log('Invalid result chars');
+                    console.log('[DECODE] Invalid result chars');
                     return null;
                 }
                 
                 // Part 3: Decode time
                 const timePart = parts[2];
+                console.log('[DECODE] Time part:', timePart);
+                
                 if (timePart.length !== 4) {
-                    console.log('Invalid time part length:', timePart.length);
+                    console.log('[DECODE] Invalid time part length:', timePart.length);
                     return null;
                 }
                 
@@ -768,20 +781,20 @@
                 const min2 = decodeChar(timePart[1]);
                 const sec1 = decodeChar(timePart[2]);
                 const sec2 = decodeChar(timePart[3]);
+                console.log('[DECODE] Time digits - min1:', min1, 'min2:', min2, 'sec1:', sec1, 'sec2:', sec2);
                 
                 if (min1 === undefined || min2 === undefined || 
                     sec1 === undefined || sec2 === undefined) {
-                    console.log('Invalid time chars');
+                    console.log('[DECODE] Invalid time chars');
                     return null;
                 }
                 
                 const minutes = (min1 * 10) + min2;
                 const seconds = (sec1 * 10) + sec2;
                 const time = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                console.log('[DECODE] Final time:', time);
                 
-                console.log('Successfully decoded:', { name, phone, correct, wrong, unanswered, time });
-                
-                return {
+                const result = {
                     name: name,
                     phone: phone,
                     correct: correct,
@@ -790,8 +803,11 @@
                     time: time,
                     code: code
                 };
+                
+                console.log('[DECODE] Successfully decoded, returning:', result);
+                return result;
             } catch (e) {
-                console.error('Decode error:', e);
+                console.error('[DECODE] Error:', e);
                 return null;
             }
         }
