@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>সীরাতুন নবী ﷺ প্রতিযোগিতা v2</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>সীরাতুন নবী ﷺ প্রতিযোগিতা</title>
     <style>
         * {
             margin: 0;
@@ -117,56 +116,6 @@
             margin-bottom: 10px;
         }
         
-        .decoder-box {
-            background: #f0f9ff;
-            border: 2px solid #3b82f6;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-        
-        .decoder-box h3 {
-            color: #1e40af;
-            margin-bottom: 15px;
-        }
-        
-        .decode-input {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .decode-input input {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #3b82f6;
-            border-radius: 10px;
-            font-size: 14px;
-            text-transform: none;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-        }
-        
-        .decode-result {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .decode-result.show {
-            display: block;
-        }
-        
-        .result-item {
-            padding: 10px;
-            margin: 5px 0;
-            border-left: 4px solid #10b981;
-            padding-left: 15px;
-            font-size: 16px;
-        }
-        
         .auto-save-indicator {
             position: fixed;
             top: 20px;
@@ -262,15 +211,6 @@
             background: #dc2626;
         }
         
-        .btn-success {
-            background: #059669;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #047857;
-        }
-        
         .btn-whatsapp {
             background: #25D366;
             color: white;
@@ -278,17 +218,6 @@
         
         .btn-whatsapp:hover {
             background: #128C7E;
-        }
-        
-        .btn-decode {
-            background: #3b82f6;
-            color: white;
-            padding: 15px 30px;
-            width: auto;
-        }
-        
-        .btn-decode:hover {
-            background: #2563eb;
         }
         
         .timer-box {
@@ -310,6 +239,15 @@
             color: #ef4444;
             font-size: 24px;
             font-weight: bold;
+        }
+        
+        .timer.warning {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .progress-bar {
@@ -406,101 +344,10 @@
             margin: 10px 0;
         }
         
-        .admin-link {
-            text-align: center;
-            margin-top: 30px;
-        }
-        
-        .admin-link button {
-            background: none;
-            border: none;
-            color: #6b7280;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        
-        .admin-link button:hover {
-            color: #374151;
-        }
-        
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .export-buttons button {
-            flex: 1;
-            min-width: 150px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        thead {
-            background: #10b981;
-            color: white;
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: center;
-        }
-        
-        th {
-            font-weight: bold;
-        }
-        
-        tbody tr {
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .badge-green {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .badge-red {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .badge-gray {
-            background: #f3f4f6;
-            color: #374151;
-        }
-        
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
         .loading {
             text-align: center;
             padding: 40px;
             color: #6b7280;
-        }
-        
-        .hidden {
-            display: none;
         }
         
         /* Mobile Responsiveness */
@@ -515,7 +362,6 @@
             
             .card {
                 padding: 20px;
-                border-radius: 15px;
             }
             
             .verification-code {
@@ -524,14 +370,6 @@
             
             .timer {
                 font-size: 18px;
-            }
-            
-            .timer-box {
-                padding: 15px;
-            }
-            
-            .question-card {
-                padding: 20px;
             }
             
             .question-text {
@@ -550,82 +388,6 @@
             .nav-buttons button {
                 width: 100%;
             }
-            
-            .auto-save-indicator {
-                top: 10px;
-                right: 10px;
-                padding: 8px 15px;
-                font-size: 12px;
-            }
-            
-            .admin-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
-            .export-buttons {
-                flex-direction: column;
-            }
-            
-            .export-buttons button {
-                width: 100%;
-            }
-            
-            .decode-input {
-                flex-direction: column;
-            }
-            
-            table {
-                font-size: 12px;
-            }
-            
-            th, td {
-                padding: 8px 4px;
-            }
-            
-            .container {
-                max-width: 100%;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.5em;
-            }
-            
-            .subtitle {
-                font-size: 14px;
-            }
-            
-            .info-box {
-                padding: 15px;
-            }
-            
-            .info-box li {
-                font-size: 14px;
-            }
-            
-            .question-text {
-                font-size: 16px;
-            }
-            
-            .btn {
-                padding: 15px;
-                font-size: 16px;
-            }
-            
-            .success-icon {
-                font-size: 60px;
-            }
-            
-            .success-message h2 {
-                font-size: 24px;
-            }
-            
-            .success-message p {
-                font-size: 16px;
-            }
         }
     </style>
 </head>
@@ -634,69 +396,35 @@
     <div id="app"></div>
 
     <script>
-        console.log('=== SCRIPT LOADED - VERSION 2.0 ===');
+        // WhatsApp নম্বর
+        const WHATSAPP_NUMBER = '8801886667466';
         
-        // WhatsApp নম্বর (এখানে আপনার নম্বর দিন)
-        const WHATSAPP_NUMBER = '8801712345678'; // এই নম্বরটি পরিবর্তন করুন
-        
-        // Encoding/Decoding system - BACKGROUND mapping
-        // B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
+        // Encoding system - BACKGROUND mapping
         const ENCODE_MAP = ['B', 'A', 'C', 'K', 'G', 'R', 'O', 'U', 'N', 'D'];
         
-        // For decoding (letter to number)
-        function decodeChar(char) {
-            const map = {'B':0, 'A':1, 'C':2, 'K':3, 'G':4, 'R':5, 'O':6, 'U':7, 'N':8, 'D':9};
-            return map[char];
-        }
-        
-        // Base64 encode/decode functions
+        // Base64 encode
         function base64Encode(str) {
-            console.log('[BASE64-ENCODE] Input:', str);
             try {
                 const utf8Bytes = new TextEncoder().encode(str);
                 let binary = '';
                 utf8Bytes.forEach(byte => binary += String.fromCharCode(byte));
-                const result = btoa(binary);
-                console.log('[BASE64-ENCODE] Output:', result);
-                return result;
+                return btoa(binary);
             } catch (e) {
-                console.error('[BASE64-ENCODE] Error:', e);
+                console.error('Encode error:', e);
                 return '';
-            }
-        }
-        
-        function base64Decode(str) {
-            console.log('[BASE64-DECODE] Input:', str);
-            try {
-                const binary = atob(str);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) {
-                    bytes[i] = binary.charCodeAt(i);
-                }
-                const result = new TextDecoder().decode(bytes);
-                console.log('[BASE64-DECODE] Output:', result);
-                return result;
-            } catch (e) {
-                console.error('[BASE64-DECODE] Error:', e);
-                return null;
             }
         }
         
         // Generate verification code
         function generateVerificationCode(correct, wrong, unanswered, phone, name, timeTaken) {
-            console.log('[GEN-CODE] Inputs:', {correct, wrong, unanswered, phone, name, timeTaken});
-            
-            // Part 1: Encode name and phone
             const namePhone = `${name}|${phone}`;
             const encodedNamePhone = base64Encode(namePhone);
             
-            // Part 2: Result code
             const c = ENCODE_MAP[correct] || 'B';
             const w = ENCODE_MAP[wrong] || 'B';
             const u = ENCODE_MAP[unanswered] || 'B';
             const resultCode = `${c}${w}${u}`;
             
-            // Part 3: Time code
             const timeMatch = timeTaken.match(/(\d+):(\d+)/);
             if (timeMatch) {
                 const mins = parseInt(timeMatch[1]);
@@ -708,74 +436,10 @@
                 const sec2 = ENCODE_MAP[secs % 10] || 'B';
                 
                 const timeCode = `${min1}${min2}${sec1}${sec2}`;
-                const finalCode = `${encodedNamePhone}-${resultCode}-${timeCode}`;
-                
-                console.log('[GEN-CODE] Generated code:', finalCode);
-                return finalCode;
+                return `${encodedNamePhone}-${resultCode}-${timeCode}`;
             }
             
             return `${encodedNamePhone}-${resultCode}-BBBB`;
-        }
-        
-        // Decode verification code
-        function decodeVerificationCode(code) {
-            console.log('[DECODE-CODE] Input:', code);
-            
-            try {
-                const parts = code.split('-');
-                console.log('[DECODE-CODE] Parts:', parts);
-                
-                if (parts.length !== 3) {
-                    console.error('[DECODE-CODE] Invalid parts length');
-                    return null;
-                }
-                
-                // Decode name and phone
-                const namePhone = base64Decode(parts[0]);
-                console.log('[DECODE-CODE] Decoded namePhone:', namePhone);
-                
-                if (!namePhone || !namePhone.includes('|')) {
-                    console.error('[DECODE-CODE] Invalid namePhone format');
-                    return null;
-                }
-                
-                const [decodedName, decodedPhone] = namePhone.split('|');
-                console.log('[DECODE-CODE] Name:', decodedName, 'Phone:', decodedPhone);
-                
-                // Decode result
-                const correct = decodeChar(parts[1][0]) || 0;
-                const wrong = decodeChar(parts[1][1]) || 0;
-                const unanswered = decodeChar(parts[1][2]) || 0;
-                console.log('[DECODE-CODE] Results:', {correct, wrong, unanswered});
-                
-                // Decode time
-                const min1 = decodeChar(parts[2][0]) || 0;
-                const min2 = decodeChar(parts[2][1]) || 0;
-                const sec1 = decodeChar(parts[2][2]) || 0;
-                const sec2 = decodeChar(parts[2][3]) || 0;
-                
-                const minutes = (min1 * 10) + min2;
-                const seconds = (sec1 * 10) + sec2;
-                const decodedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                console.log('[DECODE-CODE] Time:', decodedTime);
-                
-                const result = {
-                    name: decodedName,
-                    phone: decodedPhone,
-                    correct: correct,
-                    wrong: wrong,
-                    unanswered: unanswered,
-                    time: decodedTime,
-                    code: code
-                };
-                
-                console.log('[DECODE-CODE] Final result:', result);
-                return result;
-                
-            } catch (e) {
-                console.error('[DECODE-CODE] Exception:', e);
-                return null;
-            }
         }
         
         // প্রশ্ন ডাটা
@@ -848,33 +512,23 @@
             }
         ];
 
-        // State
+        // State - সময় ৩ মিনিট (১৮০ সেকেন্ড)
         let state = {
             view: 'start',
             participant: { name: '', phone: '' },
             answers: {},
             currentQuestion: 0,
-            timeLeft: 60 * 60,
+            timeLeft: 3 * 60, // ৩ মিনিট = ১৮০ সেকেন্ড
             startTime: null,
-            submissions: [],
             timerInterval: null,
             loading: false,
             autoSaveTimeout: null,
             lastSubmission: null
         };
 
-        // WhatsApp function
+// WhatsApp function
         function sendToWhatsApp(submission) {
-            const message = `
-🕌 সীরাতুন নবী ﷺ প্রতিযোগিতা
-
-👤 নাম: ${submission.name}
-📱 মোবাইল: ${submission.phone}
-🔐 Code: ${submission.verificationCode}
-
-আমার পরীক্ষা সম্পন্ন হয়েছে।
-            `.trim();
-
+            const message = submission.verificationCode;
             const encodedMessage = encodeURIComponent(message);
             return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
         }
@@ -890,17 +544,6 @@
             } catch (error) {
                 console.error('Save error:', error);
                 return false;
-            }
-        }
-
-        async function loadSubmissions() {
-            try {
-                const subs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
-                state.submissions = subs;
-                return subs;
-            } catch (error) {
-                console.error('Load error:', error);
-                return [];
             }
         }
 
@@ -968,51 +611,6 @@
             }
         }
 
-        // Export functions
-        function exportToCSV() {
-            if (state.submissions.length === 0) {
-                alert('কোনো ডাটা নেই এক্সপোর্ট করার জন্য');
-                return;
-            }
-
-            let csv = 'নাম,মোবাইল,Code,সঠিক উত্তর,ভুল উত্তর,উত্তরহীন,সময়,জমার তারিখ\n';
-            
-            state.submissions.forEach(sub => {
-                csv += `"${sub.name}","${sub.phone}","${sub.verificationCode}",${sub.mcqCorrect},${sub.mcqWrong},${sub.mcqUnanswered},"${sub.timeTaken}","${sub.submittedAt}"\n`;
-            });
-
-            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.csv';
-            link.click();
-        }
-
-        function exportToExcel() {
-            if (state.submissions.length === 0) {
-                alert('কোনো ডাটা নেই এক্সপোর্ট করার জন্য');
-                return;
-            }
-
-            const data = state.submissions.map((sub, idx) => ({
-                'ক্রমিক': idx + 1,
-                'নাম': sub.name,
-                'মোবাইল': sub.phone,
-                'Code': sub.verificationCode,
-                'সঠিক উত্তর': sub.mcqCorrect,
-                'ভুল উত্তর': sub.mcqWrong,
-                'উত্তরহীন': sub.mcqUnanswered,
-                'সময়': sub.timeTaken,
-                'জমার তারিখ': sub.submittedAt
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Results');
-            
-            XLSX.writeFile(wb, 'সীরাত_প্রতিযোগিতা_ফলাফল_' + new Date().toISOString().split('T')[0] + '.xlsx');
-        }
-
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
@@ -1052,7 +650,13 @@
 
         function updateTimer() {
             const el = document.getElementById('timer');
-            if (el) el.textContent = formatTime(state.timeLeft);
+            if (el) {
+                el.textContent = formatTime(state.timeLeft);
+                // ৩০ সেকেন্ড বা কম থাকলে warning animation
+                if (state.timeLeft <= 30) {
+                    el.classList.add('warning');
+                }
+            }
         }
 
         async function submitQuiz() {
@@ -1159,89 +763,6 @@
             }
         }
 
-        function goToStart() {
-            state.view = 'start';
-            state.currentQuestion = 0;
-            state.answers = {};
-            state.timeLeft = 60 * 60;
-            if (state.timerInterval) {
-                clearInterval(state.timerInterval);
-            }
-            render();
-        }
-
-        async function showAdmin() {
-            const pass = prompt('অ্যাডমিন পাসওয়ার্ড:');
-            if (pass === 'admin123') {
-                state.view = 'admin';
-                state.loading = true;
-                render();
-                await loadSubmissions();
-                state.loading = false;
-                render();
-            } else {
-                alert('ভুল পাসওয়ার্ড');
-            }
-        }
-
-        function decodeCode() {
-            const input = document.getElementById('decodeInput');
-            const result = document.getElementById('decodeResult');
-            
-            if (!input || !result) return;
-            
-            const code = input.value.trim();
-            if (!code) {
-                alert('দয়া করে একটি Code দিন');
-                return;
-            }
-            
-            console.log('=== DECODE BUTTON CLICKED ===');
-            console.log('Code:', code);
-            
-            const decoded = decodeVerificationCode(code);
-            
-            console.log('Decoded:', decoded);
-            
-            if (decoded && decoded.name && decoded.phone) {
-                result.innerHTML = `
-                    <div style="background: #d1fae5; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                        <h4 style="color: #065f46; margin-bottom: 10px;">✅ Code Successfully Decoded!</h4>
-                    </div>
-                    <div class="result-item">
-                        <strong>👤 নাম:</strong> ${decoded.name}
-                    </div>
-                    <div class="result-item">
-                        <strong>📱 মোবাইল:</strong> ${decoded.phone}
-                    </div>
-                    <div class="result-item">
-                        <strong>✅ সঠিক উত্তর:</strong> ${decoded.correct}
-                    </div>
-                    <div class="result-item">
-                        <strong>❌ ভুল উত্তর:</strong> ${decoded.wrong}
-                    </div>
-                    <div class="result-item">
-                        <strong>⚪ উত্তরহীন:</strong> ${decoded.unanswered}
-                    </div>
-                    <div class="result-item">
-                        <strong>⏱️ সময়:</strong> ${decoded.time}
-                    </div>
-                    <div class="result-item">
-                        <strong>🔐 Code:</strong> <span style="font-family: monospace; background: #f3f4f6; padding: 5px 10px; border-radius: 5px; word-break: break-all;">${decoded.code}</span>
-                    </div>
-                `;
-                result.classList.add('show');
-            } else {
-                result.innerHTML = `
-                    <div style="background: #fee2e2; padding: 15px; border-radius: 10px;">
-                        <h4 style="color: #991b1b; margin-bottom: 10px;">❌ Decode Failed!</h4>
-                        <p style="color: #991b1b;">Code decode হতে পারেনি। Console দেখুন বিস্তারিত error এর জন্য।</p>
-                    </div>
-                `;
-                result.classList.add('show');
-            }
-        }
-
         // Render functions
         function renderStart() {
             return `
@@ -1254,12 +775,13 @@
                             <h3>প্রতিযোগিতার বিবরণ:</h3>
                             <ul>
                                 <li>📝 মোট প্রশ্ন: ১০টি (৮টি MCQ + ২টি সংক্ষিপ্ত)</li>
-                                <li>⏰ সময়: ১ ঘন্টা (৬০ মিনিট)</li>
-                                <li>✅ একবার শুরু করলে থামানো যাবে না</li>
-                                <li>💾 আপনার উত্তর স্বয়ংক্রিয়ভাবে সংরক্ষিত হবে</li>
+                                <li>⏰ সময়: ৩ মিনিট</li>
+                                <li>✅ একবার শুরু করলে পরীক্ষা শেষ না করে বের হওয়া যাবে না</li>
                                 <li>🔐 পরীক্ষা শেষে একটি Verification Code পাবেন</li>
-                                <li>📱 Code সহ WhatsApp এ ফলাফল পাঠান</li>
+                                <li>📱 Verification Code টি অবশ্যই  WhatsApp এ পাঠাতে হবে</li>
                                 <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
+<li><small><b>"Verification Code এ কোন পরিবর্তন করে পাঠালে আপনার পরীক্ষা বাতিল বলে গণ্য করা হবে"</b></small></li>
+
                             </ul>
                         </div>
 
@@ -1270,16 +792,12 @@
 
                         <div class="form-group">
                             <label>📱 মোবাইল নম্বর *</label>
-                            <input type="tel" id="phone" placeholder="০১XXXXXXXXX">
+                            <input type="tel" id="phone" placeholder="01XXXXXXXXX">
                         </div>
 
                         <button class="btn btn-primary" onclick="startQuiz()">
                             প্রতিযোগিতা শুরু করুন
                         </button>
-
-                        <div class="admin-link">
-                            <button onclick="showAdmin()">অ্যাডমিন প্যানেল</button>
-                        </div>
                     </div>
                 </div>
             `;
@@ -1319,7 +837,7 @@
                             <div style="color:#065f46; font-weight:bold;">
                                 প্রশ্ন ${state.currentQuestion + 1} / ${QUESTIONS.length}
                             </div>
-                            <div class="timer">
+                            <div class="timer" id="timerElement">
                                 ⏰ <span id="timer">${formatTime(state.timeLeft)}</span>
                             </div>
                         </div>
@@ -1357,7 +875,7 @@
 
         function renderSubmitted() {
             const whatsappUrl = sendToWhatsApp(state.lastSubmission);
-            const displayNumber = WHATSAPP_NUMBER.replace('88', '').replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+            const displayNumber = WHATSAPP_NUMBER.replace('88', '').replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
             
             return `
                 <div class="container" style="margin-top:50px;">
@@ -1394,87 +912,6 @@
             `;
         }
 
-        function renderAdmin() {
-            if (state.loading) {
-                return '<div class="loading">লোড হচ্ছে...</div>';
-            }
-
-            const rows = state.submissions
-                .sort((a, b) => b.timestamp - a.timestamp)
-                .map((sub, idx) => `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td>${sub.name}</td>
-                        <td>${sub.phone}</td>
-                        <td style="font-family: monospace; font-size: 11px; word-break: break-all;">${sub.verificationCode}</td>
-                        <td><span class="badge badge-green">${sub.mcqCorrect}</span></td>
-                        <td><span class="badge badge-red">${sub.mcqWrong}</span></td>
-                        <td><span class="badge badge-gray">${sub.mcqUnanswered}</span></td>
-                        <td>${sub.timeTaken}</td>
-                        <td style="font-size:12px;">${sub.submittedAt}</td>
-                    </tr>
-                `).join('');
-
-            return `
-                <div class="container" style="max-width:1200px;">
-                    <div class="card">
-                        <div class="admin-header">
-                            <div>
-                                <h2>অ্যাডমিন প্যানেল</h2>
-                                <p style="color:#6b7280;">মোট জমা: ${state.submissions.length}টি</p>
-                            </div>
-                            <button class="btn btn-secondary" onclick="goToStart()">প্রস্থান</button>
-                        </div>
-
-                        <div class="decoder-box">
-                            <h3>🔍 Verification Code Decoder</h3>
-                            <p style="color: #6b7280; margin-bottom: 10px;">
-                                Code পেস্ট করুন - এতে নাম, ফোন, result, সময় সব encoded আছে
-                            </p>
-                            <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">
-                                📌 BACKGROUND: B=0, A=1, C=2, K=3, G=4, R=5, O=6, U=7, N=8, D=9
-                            </p>
-                            <div class="decode-input">
-                                <input type="text" id="decodeInput" placeholder="Code এখানে paste করুন...">
-                                <button class="btn btn-decode" onclick="decodeCode()">Decode</button>
-                            </div>
-                            <div id="decodeResult" class="decode-result"></div>
-                        </div>
-
-                        <div class="export-buttons">
-                            <button class="btn btn-success" onclick="exportToExcel()">
-                                📊 Excel এ ডাউনলোড করুন
-                            </button>
-                            <button class="btn btn-primary" onclick="exportToCSV()">
-                                📄 CSV এ ডাউনলোড করুন
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="card" style="padding:0; overflow-x:auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>নাম</th>
-                                    <th>মোবাইল</th>
-                                    <th>Code</th>
-                                    <th>সঠিক</th>
-                                    <th>ভুল</th>
-                                    <th>উত্তরহীন</th>
-                                    <th>সময়</th>
-                                    <th>জমার সময়</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rows || '<tr><td colspan="9" style="text-align:center; padding:40px; color:#9ca3af;">এখনো কোনো জমা নেই</td></tr>'}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-        }
-
         function render() {
             const app = document.getElementById('app');
             
@@ -1484,14 +921,11 @@
                 app.innerHTML = renderQuiz();
             } else if (state.view === 'submitted') {
                 app.innerHTML = renderSubmitted();
-            } else if (state.view === 'admin') {
-                app.innerHTML = renderAdmin();
             }
         }
 
         // Initialize
         window.onload = function() {
-            console.log('=== APP INITIALIZED - V2.0 ===');
             if (!loadProgress()) {
                 render();
             }
