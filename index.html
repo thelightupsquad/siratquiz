@@ -147,7 +147,7 @@
             margin-bottom: 8px;
         }
         
-        input, textarea {
+        input {
             width: 100%;
             padding: 15px;
             border: 2px solid #d1d5db;
@@ -156,7 +156,7 @@
             transition: border-color 0.3s;
         }
         
-        input:focus, textarea:focus {
+        input:focus {
             outline: none;
             border-color: #10b981;
         }
@@ -442,7 +442,7 @@
             return `${encodedNamePhone}-${resultCode}-BBBB`;
         }
         
-        // প্রশ্ন ডাটা
+        // প্রশ্ন ডাটা - শুধু MCQ
         const QUESTIONS = [
             {
                 id: 1,
@@ -499,8 +499,7 @@
                 question: 'মক্কা বিজয় কোন সালে হয়?',
                 options: ['৬ হিজরী', '৭ হিজরী', '৮ হিজরী', '৯ হিজরী'],
                 correctAnswer: 2
-            },
-
+            }
         ];
 
         // State - সময় ৩ মিনিট (১৮০ সেকেন্ড)
@@ -509,7 +508,7 @@
             participant: { name: '', phone: '' },
             answers: {},
             currentQuestion: 0,
-            timeLeft: 3 * 60, // ৩ মিনিট = ১৮০ সেকেন্ড
+            timeLeft: 3 * 60,
             startTime: null,
             timerInterval: null,
             loading: false,
@@ -517,7 +516,7 @@
             lastSubmission: null
         };
 
-// WhatsApp function
+        // WhatsApp function
         function sendToWhatsApp(submission) {
             const message = submission.verificationCode;
             const encodedMessage = encodeURIComponent(message);
@@ -643,7 +642,6 @@
             const el = document.getElementById('timer');
             if (el) {
                 el.textContent = formatTime(state.timeLeft);
-                // ৩০ সেকেন্ড বা কম থাকলে warning animation
                 if (state.timeLeft <= 30) {
                     el.classList.add('warning');
                 }
@@ -661,10 +659,9 @@
             const endTime = new Date();
             const timeTaken = Math.floor((endTime - state.startTime) / 1000);
             
-            const mcqs = QUESTIONS.filter(q => q.type === 'mcq');
             let correct = 0, wrong = 0;
             
-            mcqs.forEach(q => {
+            QUESTIONS.forEach(q => {
                 if (state.answers[q.id] !== undefined) {
                     if (state.answers[q.id] === q.correctAnswer) {
                         correct++;
@@ -674,7 +671,7 @@
                 }
             });
 
-            const unanswered = mcqs.length - correct - wrong;
+            const unanswered = QUESTIONS.length - correct - wrong;
             
             const verificationCode = generateVerificationCode(
                 correct, 
@@ -685,13 +682,6 @@
                 formatTime(timeTaken)
             );
 
-            const shortAnswers = QUESTIONS
-                .filter(q => q.type === 'short')
-                .map(q => ({
-                    question: q.question,
-                    answer: state.answers[q.id] || 'উত্তর দেননি'
-                }));
-
             const submission = {
                 name: state.participant.name,
                 phone: state.participant.phone,
@@ -699,7 +689,6 @@
                 mcqCorrect: correct,
                 mcqWrong: wrong,
                 mcqUnanswered: unanswered,
-                shortAnswers: shortAnswers,
                 timeTaken: formatTime(timeTaken),
                 submittedAt: new Date().toLocaleString('bn-BD'),
                 timestamp: Date.now()
@@ -723,20 +712,6 @@
             state.answers[questionId] = answerIndex;
             autoSave();
             render();
-        }
-
-        function updateShortAnswer(questionId) {
-            const el = document.getElementById('shortAnswer');
-            if (el) {
-                state.answers[questionId] = el.value;
-                
-                if (state.autoSaveTimeout) {
-                    clearTimeout(state.autoSaveTimeout);
-                }
-                state.autoSaveTimeout = setTimeout(() => {
-                    autoSave();
-                }, 1000);
-            }
         }
 
         function nextQuestion() {
@@ -767,7 +742,7 @@
                             <ul>
                                 <li>📝 মোট প্রশ্ন: ৮টি MCQ</li>
                                 <li>⏰ সময়: ৩ মিনিট</li>
-                                <li>✅ একবার শুরু করলে পরীক্ষা শেষ না করে বের হওয়া যাবে না</li>
+                                <li>✅ একবার শুরু করলে পরীক্ষা শেষ না করে বের হওয়া যাবে না</li>
                                 <li>🔐 পরীক্ষা শেষে একটি Verification Code পাবেন</li>
                                 <li>📱 Verification Code টি অবশ্যই WhatsApp এ পাঠাতে হবে</li>
                                 <li>"Verification Code এ কোন পরিবর্তন করে পাঠালে আপনার পরীক্ষা বাতিল করা হবে"</li>
@@ -801,24 +776,14 @@
             const q = QUESTIONS[state.currentQuestion];
             const progress = ((state.currentQuestion + 1) / QUESTIONS.length) * 100;
 
-            let optionsHTML = '';
-            if (q.type === 'mcq') {
-                optionsHTML = q.options.map((opt, idx) => {
-                    const selected = state.answers[q.id] === idx ? 'selected' : '';
-                    return `
-                        <button class="option ${selected}" onclick="selectAnswer(${q.id}, ${idx})">
-                            <strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}
-                        </button>
-                    `;
-                }).join('');
-            } else {
-                const val = state.answers[q.id] || '';
-                optionsHTML = `
-                    <textarea id="shortAnswer" oninput="updateShortAnswer(${q.id})" 
-                              rows="4" style="width:100%; padding:15px; border:2px solid #d1d5db; border-radius:10px;"
-                              placeholder="এখানে আপনার উত্তর লিখুন...">${val}</textarea>
+            const optionsHTML = q.options.map((opt, idx) => {
+                const selected = state.answers[q.id] === idx ? 'selected' : '';
+                return `
+                    <button class="option ${selected}" onclick="selectAnswer(${q.id}, ${idx})">
+                        <strong>${String.fromCharCode(65 + idx)}.</strong> ${opt}
+                    </button>
                 `;
-            }
+            }).join('');
 
             return `
                 <div class="container">
@@ -837,9 +802,7 @@
                     </div>
 
                     <div class="question-card">
-                        <span class="question-badge">
-                            ${q.type === 'mcq' ? 'বহুনির্বাচনী' : 'সংক্ষিপ্ত উত্তর'}
-                        </span>
+                        <span class="question-badge">বহুনির্বাচনী</span>
                         <div class="question-text">${q.question}</div>
                         ${optionsHTML}
                     </div>
