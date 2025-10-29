@@ -67,53 +67,34 @@
             padding-left: 25px;
         }
         
-        .code-box {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px 0;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-        }
-        
-        .code-label {
-            color: white;
-            font-size: 14px;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
-        
-        .verification-code {
-            font-size: 16px;
-            font-weight: bold;
-            color: white;
-            letter-spacing: 1px;
-            font-family: 'Courier New', monospace;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            margin: 15px 0;
-            word-break: break-all;
-            line-height: 1.6;
-        }
-        
-        .code-instruction {
-            color: white;
-            font-size: 14px;
-            margin-top: 10px;
-            opacity: 0.9;
-        }
-        
-        .whatsapp-box {
-            background: #dcf8c6;
-            border: 2px solid #25D366;
+        .setup-box {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
             border-radius: 15px;
             padding: 20px;
-            margin-top: 20px;
-            text-align: center;
+            margin-bottom: 20px;
         }
         
-        .whatsapp-box h3 {
-            color: #075e54;
-            margin-bottom: 10px;
+        .setup-box h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+        }
+        
+        .setup-box ol {
+            color: #78350f;
+            padding-left: 20px;
+        }
+        
+        .setup-box li {
+            margin: 8px 0;
+        }
+        
+        .setup-box code {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #dc2626;
         }
         
         .auto-save-indicator {
@@ -147,7 +128,7 @@
             margin-bottom: 8px;
         }
         
-        input {
+        input, textarea {
             width: 100%;
             padding: 15px;
             border: 2px solid #d1d5db;
@@ -156,7 +137,13 @@
             transition: border-color 0.3s;
         }
         
-        input:focus {
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input:focus, textarea:focus {
             outline: none;
             border-color: #10b981;
         }
@@ -209,15 +196,6 @@
         
         .btn-danger:hover:not(:disabled) {
             background: #dc2626;
-        }
-        
-        .btn-whatsapp {
-            background: #25D366;
-            color: white;
-        }
-        
-        .btn-whatsapp:hover {
-            background: #128C7E;
         }
         
         .timer-box {
@@ -350,7 +328,21 @@
             color: #6b7280;
         }
         
-        /* Mobile Responsiveness */
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -362,10 +354,6 @@
             
             .card {
                 padding: 20px;
-            }
-            
-            .verification-code {
-                font-size: 14px;
             }
             
             .timer {
@@ -396,53 +384,11 @@
     <div id="app"></div>
 
     <script>
-        // WhatsApp নম্বর
-        const WHATSAPP_NUMBER = '8801886667466';
+        // ⚠️ IMPORTANT: আপনার Google Apps Script Web App URL এখানে দিন
+        // উদাহরণ: 'https://script.google.com/macros/s/AKfycbxxx.../exec'
+        // খালি রাখলে প্রথমে setup page দেখাবে
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTTKdFhRoE3wqKHVoAEDyAXExtlAPrgaQKkS_W0Qby3CAcAghwug-GjhIkGD-1_lWphw/exec';
         
-        // Encoding system - BACKGROUND mapping
-        const ENCODE_MAP = ['B', 'A', 'C', 'K', 'G', 'R', 'O', 'U', 'N', 'D'];
-        
-        // Base64 encode
-        function base64Encode(str) {
-            try {
-                const utf8Bytes = new TextEncoder().encode(str);
-                let binary = '';
-                utf8Bytes.forEach(byte => binary += String.fromCharCode(byte));
-                return btoa(binary);
-            } catch (e) {
-                console.error('Encode error:', e);
-                return '';
-            }
-        }
-        
-        // Generate verification code
-        function generateVerificationCode(correct, wrong, unanswered, phone, name, timeTaken) {
-            const namePhone = `${name}|${phone}`;
-            const encodedNamePhone = base64Encode(namePhone);
-            
-            const c = ENCODE_MAP[correct] || 'B';
-            const w = ENCODE_MAP[wrong] || 'B';
-            const u = ENCODE_MAP[unanswered] || 'B';
-            const resultCode = `${c}${w}${u}`;
-            
-            const timeMatch = timeTaken.match(/(\d+):(\d+)/);
-            if (timeMatch) {
-                const mins = parseInt(timeMatch[1]);
-                const secs = parseInt(timeMatch[2]);
-                
-                const min1 = ENCODE_MAP[Math.floor(mins / 10)] || 'B';
-                const min2 = ENCODE_MAP[mins % 10] || 'B';
-                const sec1 = ENCODE_MAP[Math.floor(secs / 10)] || 'B';
-                const sec2 = ENCODE_MAP[secs % 10] || 'B';
-                
-                const timeCode = `${min1}${min2}${sec1}${sec2}`;
-                return `${encodedNamePhone}-${resultCode}-${timeCode}`;
-            }
-            
-            return `${encodedNamePhone}-${resultCode}-BBBB`;
-        }
-        
-        // প্রশ্ন ডাটা - শুধু MCQ
         const QUESTIONS = [
             {
                 id: 1,
@@ -502,9 +448,8 @@
             }
         ];
 
-        // State - সময় ৩ মিনিট (১৮০ সেকেন্ড)
         let state = {
-            view: 'start',
+            view: 'setup',
             participant: { name: '', phone: '' },
             answers: {},
             currentQuestion: 0,
@@ -512,93 +457,19 @@
             startTime: null,
             timerInterval: null,
             loading: false,
-            autoSaveTimeout: null,
+            scriptUrl: '',
             lastSubmission: null
         };
 
-        // WhatsApp function
-        function sendToWhatsApp(submission) {
-            const message = submission.verificationCode;
-            const encodedMessage = encodeURIComponent(message);
-            return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-        }
-
-        // Storage functions
-        async function saveSubmission(submission) {
-            try {
-                const allSubs = JSON.parse(localStorage.getItem('sirat_subs') || '[]');
-                allSubs.push(submission);
-                localStorage.setItem('sirat_subs', JSON.stringify(allSubs));
-                state.lastSubmission = submission;
-                return true;
-            } catch (error) {
-                console.error('Save error:', error);
-                return false;
+        function checkSetup() {
+            const url = document.getElementById('scriptUrl').value.trim();
+            if (!url) {
+                alert('দয়া করে Google Apps Script URL দিন');
+                return;
             }
-        }
-
-        // Auto-save
-        function autoSave() {
-            if (state.view === 'quiz') {
-                const progressData = {
-                    participant: state.participant,
-                    answers: state.answers,
-                    currentQuestion: state.currentQuestion,
-                    timeLeft: state.timeLeft,
-                    startTime: state.startTime
-                };
-                
-                try {
-                    localStorage.setItem('quiz_progress', JSON.stringify(progressData));
-                    showAutoSaveIndicator('সংরক্ষিত');
-                } catch (e) {
-                    console.log('Auto-save failed');
-                }
-            }
-        }
-
-        function showAutoSaveIndicator(message) {
-            const indicator = document.getElementById('autoSaveIndicator');
-            if (indicator) {
-                indicator.textContent = '✓ ' + message;
-                indicator.classList.add('show');
-                setTimeout(() => {
-                    indicator.classList.remove('show');
-                }, 2000);
-            }
-        }
-
-        function loadProgress() {
-            try {
-                const saved = localStorage.getItem('quiz_progress');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (confirm('আপনার আগের প্রগ্রেস পাওয়া গেছে। এটি চালিয়ে যেতে চান?')) {
-                        state.participant = data.participant;
-                        state.answers = data.answers;
-                        state.currentQuestion = data.currentQuestion;
-                        state.timeLeft = data.timeLeft;
-                        state.startTime = new Date(data.startTime);
-                        state.view = 'quiz';
-                        startTimer();
-                        render();
-                        return true;
-                    } else {
-                        localStorage.removeItem('quiz_progress');
-                    }
-                }
-            } catch (e) {
-                console.log('Could not load progress');
-            }
-            return false;
-        }
-
-        function clearProgress() {
-            try {
-                localStorage.removeItem('quiz_progress');
-            } catch (e) {
-                console.log('Could not clear progress');
-            }
+            state.scriptUrl = url;
+            state.view = 'start';
+            render();
         }
 
         function formatTime(seconds) {
@@ -620,7 +491,6 @@
             state.startTime = new Date();
             state.view = 'quiz';
             startTimer();
-            autoSave();
             render();
         }
 
@@ -631,10 +501,6 @@
                     submitQuiz();
                 }
                 updateTimer();
-                
-                if (state.timeLeft % 30 === 0) {
-                    autoSave();
-                }
             }, 1000);
         }
 
@@ -673,51 +539,48 @@
 
             const unanswered = QUESTIONS.length - correct - wrong;
             
-            const verificationCode = generateVerificationCode(
-                correct, 
-                wrong, 
-                unanswered, 
-                state.participant.phone,
-                state.participant.name,
-                formatTime(timeTaken)
-            );
-
             const submission = {
                 name: state.participant.name,
                 phone: state.participant.phone,
-                verificationCode: verificationCode,
-                mcqCorrect: correct,
-                mcqWrong: wrong,
-                mcqUnanswered: unanswered,
+                correct: correct,
+                wrong: wrong,
+                unanswered: unanswered,
                 timeTaken: formatTime(timeTaken),
                 submittedAt: new Date().toLocaleString('bn-BD'),
                 timestamp: Date.now()
             };
 
-            const saved = await saveSubmission(submission);
-            
-            if (saved) {
-                clearProgress();
+            try {
+                const response = await fetch(state.scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submission)
+                });
+
+                state.lastSubmission = submission;
                 state.loading = false;
                 state.view = 'submitted';
-            } else {
+                render();
+                
+            } catch (error) {
+                console.error('Submission error:', error);
                 state.loading = false;
-                alert('জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+                alert('জমা দিতে সমস্যা হয়েছে। ইন্টারনেট চেক করুন এবং আবার চেষ্টা করুন।');
+                render();
             }
-            
-            render();
         }
 
         function selectAnswer(questionId, answerIndex) {
             state.answers[questionId] = answerIndex;
-            autoSave();
             render();
         }
 
         function nextQuestion() {
             if (state.currentQuestion < QUESTIONS.length - 1) {
                 state.currentQuestion++;
-                autoSave();
                 render();
             }
         }
@@ -729,7 +592,63 @@
             }
         }
 
-        // Render functions
+        function renderSetup() {
+            return `
+                <div class="container">
+                    <div class="card">
+                        <h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>
+                        <p class="subtitle">Google Sheets Setup</p>
+                        
+                        <div class="setup-box">
+                            <h3>🔧 Setup নির্দেশনা:</h3>
+                            <ol>
+                                <li><strong>Google Sheets</strong> এ যান এবং নতুন Sheet তৈরি করুন</li>
+                                <li>Sheet এর প্রথম row তে এই headers লিখুন:<br>
+                                    <code>Name | Phone | Correct | Wrong | Unanswered | Time | Submitted</code>
+                                </li>
+                                <li><strong>Extensions → Apps Script</strong> এ যান</li>
+                                <li>নিচের code টি paste করুন এবং <strong>Deploy → New deployment → Web app</strong> করুন</li>
+                                <li>Deploy করা URL টি নিচে দিন</li>
+                            </ol>
+                        </div>
+
+                        <div class="form-group">
+                            <label>📋 Apps Script Code (Copy করুন):</label>
+                            <textarea readonly onclick="this.select()">function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const data = JSON.parse(e.postData.contents);
+    
+    sheet.appendRow([
+      data.name,
+      data.phone,
+      data.correct,
+      data.wrong,
+      data.unanswered,
+      data.timeTaken,
+      data.submittedAt
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({success: true}));
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}));
+  }
+}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>🔗 Google Apps Script Web App URL:</label>
+                            <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/...../exec" value="${GOOGLE_SCRIPT_URL}">
+                        </div>
+
+                        <button class="btn btn-primary" onclick="checkSetup()">
+                            ✅ Setup সম্পন্ন, এগিয়ে যান
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderStart() {
             return `
                 <div class="container">
@@ -743,10 +662,8 @@
                                 <li>📝 মোট প্রশ্ন: ৮টি MCQ</li>
                                 <li>⏰ সময়: ৩ মিনিট</li>
                                 <li>✅ একবার শুরু করলে পরীক্ষা শেষ না করে বের হওয়া যাবে না</li>
-                                <li>🔐 পরীক্ষা শেষে একটি Verification Code পাবেন</li>
-                                <li>📱 Verification Code টি অবশ্যই WhatsApp এ পাঠাতে হবে</li>
+                                <li>📊 উত্তর সরাসরি Google Sheets এ জমা হবে</li>
                                 <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
-                                <li><small><b>"Verification Code এ কোন পরিবর্তন করে পাঠালে আপনার পরীক্ষা বাতিল বলে গণ্য করা হবে"</b></small></li>
                             </ul>
                         </div>
 
@@ -770,7 +687,16 @@
 
         function renderQuiz() {
             if (state.loading) {
-                return '<div class="loading">জমা হচ্ছে...</div>';
+                return `
+                    <div class="container">
+                        <div class="card">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                                <p style="margin-top:20px; font-size:18px;">জমা হচ্ছে...</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
 
             const q = QUESTIONS[state.currentQuestion];
@@ -827,36 +753,25 @@
         }
 
         function renderSubmitted() {
-            const whatsappUrl = sendToWhatsApp(state.lastSubmission);
-            const displayNumber = WHATSAPP_NUMBER.replace('88', '').replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
-            
             return `
                 <div class="container" style="margin-top:50px;">
                     <div class="card">
                         <div class="success-icon">✅</div>
                         <div class="success-message">
                             <h2>জমা সফল হয়েছে!</h2>
-                            <p>${state.participant.name}, আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>
+                            <p style="font-size:20px; margin:20px 0;">${state.participant.name}, আপনার উত্তরপত্র Google Sheets এ সফলভাবে জমা হয়েছে।</p>
                             
-                            <div class="code-box">
-                                <div class="code-label">🔐 আপনার Verification Code</div>
-                                <div class="verification-code">${state.lastSubmission.verificationCode}</div>
-                                <div class="code-instruction">এই Code টি সংরক্ষণ করুন এবং WhatsApp এ পাঠান</div>
+                            <div class="info-box" style="margin-top:30px;">
+                                <h3>📊 আপনার ফলাফল:</h3>
+                                <ul>
+                                    <li>✅ সঠিক উত্তর: <strong>${state.lastSubmission.correct}টি</strong></li>
+                                    <li>❌ ভুল উত্তর: <strong>${state.lastSubmission.wrong}টি</strong></li>
+                                    <li>⚪ উত্তর দেননি: <strong>${state.lastSubmission.unanswered}টি</strong></li>
+                                    <li>⏱️ সময় লেগেছে: <strong>${state.lastSubmission.timeTaken}</strong></li>
+                                </ul>
                             </div>
 
-                            <div class="whatsapp-box">
-                                <h3>📱 WhatsApp এ Code পাঠান</h3>
-                                <p style="color: #6b7280; margin: 10px 0;">
-                                    নিচের বাটনে ক্লিক করে আপনার Code পাঠান
-                                </p>
-                                <div class="whatsapp-number" style="font-weight: bold; color: #25D366; font-size: 18px; margin: 10px 0;">${displayNumber}</div>
-                                <button class="btn btn-whatsapp" onclick="window.open('${whatsappUrl}', '_blank')" style="margin-top: 15px;">
-                                    <span style="font-size: 24px;">📱</span>
-                                    WhatsApp এ পাঠান
-                                </button>
-                            </div>
-
-                            <p style="color:#6b7280; margin-top:30px; font-size: 14px;">
+                            <p style="color:#6b7280; margin-top:30px; font-size: 16px;">
                                 আল্লাহ আপনাকে উত্তম প্রতিদান দিন। 🤲
                             </p>
                         </div>
@@ -868,7 +783,9 @@
         function render() {
             const app = document.getElementById('app');
             
-            if (state.view === 'start') {
+            if (state.view === 'setup') {
+                app.innerHTML = renderSetup();
+            } else if (state.view === 'start') {
                 app.innerHTML = renderStart();
             } else if (state.view === 'quiz') {
                 app.innerHTML = renderQuiz();
@@ -877,11 +794,12 @@
             }
         }
 
-        // Initialize
         window.onload = function() {
-            if (!loadProgress()) {
-                render();
+            if (GOOGLE_SCRIPT_URL) {
+                state.scriptUrl = GOOGLE_SCRIPT_URL;
+                state.view = 'start';
             }
+            render();
         };
     </script>
 </body>
