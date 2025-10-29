@@ -13,47 +13,126 @@
         }
         
         body {
-            background: linear-gradient(135deg, #d1fae5 0%, #99f6e4 100%);
+            background: linear-gradient(135deg, #0f766e 0%, #065f46 50%, #064e3b 100%);
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .islamic-pattern {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 120px;
+            opacity: 0.05;
+            transform: rotate(15deg);
+            pointer-events: none;
         }
         
         .card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+            padding: 50px;
             margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.5);
         }
         
         h1 {
-            color: #065f46;
-            font-size: 2.5em;
+            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3em;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
         
         .subtitle {
             color: #6b7280;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+            font-size: 18px;
+            font-weight: 500;
         }
         
         .info-box {
-            background: #d1fae5;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 35px;
+            border: 2px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-box::before {
+            content: '✨';
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 60px;
+            opacity: 0.1;
         }
         
         .info-box h3 {
             color: #065f46;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 700;
         }
         
         .info-box ul {
@@ -63,104 +142,127 @@
         
         .info-box li {
             color: #374151;
-            margin: 10px 0;
-            padding-left: 25px;
+            margin: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .info-box li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 20px;
         }
         
         .setup-box {
-            background: #fef3c7;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border: 2px solid #f59e0b;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15);
         }
         
         .setup-box h3 {
             color: #92400e;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 700;
         }
         
         .setup-box ol {
             color: #78350f;
-            padding-left: 20px;
+            padding-left: 25px;
+            line-height: 1.8;
         }
         
         .setup-box li {
-            margin: 8px 0;
+            margin: 12px 0;
         }
         
         .setup-box code {
             background: white;
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: 3px 10px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
             color: #dc2626;
-        }
-        
-        .auto-save-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
             font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .auto-save-indicator.show {
-            opacity: 1;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         label {
             display: block;
-            color: #374151;
-            font-weight: 600;
-            margin-bottom: 8px;
+            color: #1f2937;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
         
         input, textarea {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #d1d5db;
-            border-radius: 10px;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            background: white;
         }
         
         textarea {
-            min-height: 80px;
+            min-height: 100px;
             resize: vertical;
             font-family: 'Courier New', monospace;
+            line-height: 1.6;
         }
         
         input:focus, textarea:focus {
             outline: none;
             border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+            transform: translateY(-2px);
         }
         
         .btn {
             width: 100%;
-            padding: 18px;
+            padding: 20px;
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 700;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
         
         .btn:disabled {
@@ -169,54 +271,75 @@
         }
         
         .btn-primary {
-            background: #10b981;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
+            box-shadow: 
+                0 10px 25px rgba(16, 185, 129, 0.3),
+                0 4px 10px rgba(5, 150, 105, 0.2);
         }
         
         .btn-primary:hover:not(:disabled) {
-            background: #059669;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 35px rgba(16, 185, 129, 0.4),
+                0 5px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(-1px);
         }
         
         .btn-secondary {
-            background: #d1d5db;
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
             color: #374151;
-            padding: 12px 24px;
+            padding: 16px 28px;
             width: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         
         .btn-secondary:hover {
-            background: #9ca3af;
+            background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+            transform: translateY(-2px);
         }
         
         .btn-danger {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
+            box-shadow: 
+                0 10px 25px rgba(239, 68, 68, 0.3),
+                0 4px 10px rgba(220, 38, 38, 0.2);
         }
         
         .btn-danger:hover:not(:disabled) {
-            background: #dc2626;
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 35px rgba(239, 68, 68, 0.4),
+                0 5px 15px rgba(220, 38, 38, 0.3);
         }
         
         .timer-box {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            border: 2px solid #f3f4f6;
         }
         
         .timer-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .timer {
             color: #ef4444;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
         }
         
         .timer.warning {
@@ -224,76 +347,108 @@
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
         }
         
         .progress-bar {
             width: 100%;
-            height: 8px;
+            height: 10px;
             background: #e5e7eb;
             border-radius: 10px;
             overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .progress-fill {
             height: 100%;
-            background: #10b981;
+            background: linear-gradient(90deg, #10b981, #34d399);
             transition: width 0.3s;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
         
         .question-card {
             background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            border: 2px solid #f3f4f6;
         }
         
         .question-badge {
             display: inline-block;
-            background: #d1fae5;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
             color: #065f46;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
             font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+            border: 2px solid rgba(16, 185, 129, 0.2);
         }
         
         .question-text {
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 22px;
+            font-weight: 700;
             color: #1f2937;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            line-height: 1.5;
         }
         
         .option {
             width: 100%;
-            padding: 18px;
-            margin: 10px 0;
-            border: 2px solid #d1d5db;
-            border-radius: 10px;
+            padding: 20px 25px;
+            margin: 12px 0;
+            border: 3px solid #e5e7eb;
+            border-radius: 14px;
             background: white;
             text-align: right;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 16px;
+            font-size: 17px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #d1fae5, transparent);
+            transition: width 0.3s;
         }
         
         .option:hover {
             border-color: #10b981;
             background: #f0fdf4;
+            transform: translateX(-5px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+        }
+
+        .option:hover::before {
+            width: 100%;
         }
         
         .option.selected {
             border-color: #10b981;
-            background: #d1fae5;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            box-shadow: 
+                0 8px 20px rgba(16, 185, 129, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transform: translateX(-5px);
         }
         
         .nav-buttons {
             display: flex;
-            gap: 15px;
+            gap: 20px;
         }
         
         .nav-buttons button {
@@ -302,8 +457,23 @@
         
         .success-icon {
             text-align: center;
-            font-size: 80px;
-            margin-bottom: 20px;
+            font-size: 100px;
+            margin-bottom: 25px;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
         
         .success-message {
@@ -311,62 +481,68 @@
         }
         
         .success-message h2 {
-            color: #065f46;
-            font-size: 32px;
-            margin-bottom: 15px;
+            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 38px;
+            margin-bottom: 20px;
+            font-weight: 800;
         }
         
         .success-message p {
             color: #6b7280;
-            font-size: 18px;
-            margin: 10px 0;
+            font-size: 19px;
+            margin: 15px 0;
+            line-height: 1.6;
         }
         
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 50px;
             color: #6b7280;
         }
         
         .loading-spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #10b981;
+            border: 5px solid #f3f4f6;
+            border-top: 5px solid #10b981;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 25px auto;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
             
             h1 {
-                font-size: 1.8em;
+                font-size: 2em;
             }
             
             .card {
-                padding: 20px;
+                padding: 30px 25px;
+                border-radius: 20px;
             }
             
             .timer {
-                font-size: 18px;
+                font-size: 22px;
             }
             
             .question-text {
-                font-size: 18px;
+                font-size: 19px;
             }
             
             .option {
-                padding: 15px;
-                font-size: 15px;
+                padding: 18px 20px;
+                font-size: 16px;
             }
             
             .nav-buttons {
@@ -376,17 +552,17 @@
             .nav-buttons button {
                 width: 100%;
             }
+
+            .info-box, .setup-box {
+                padding: 25px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="autoSaveIndicator" class="auto-save-indicator">✓ সংরক্ষিত</div>
     <div id="app"></div>
 
     <script>
-        // ⚠️ IMPORTANT: আপনার Google Apps Script Web App URL এখানে দিন
-        // উদাহরণ: 'https://script.google.com/macros/s/AKfycbxxx.../exec'
-        // খালি রাখলে প্রথমে setup page দেখাবে
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdKCoh8WKK9shvA2O9BoZ-30S-8EL7RN3MSACnP2G_CRTo5N8VIOgQO8tcaWSUQZ2FFw/exec';
         
         const QUESTIONS = [
@@ -551,7 +727,7 @@
             };
 
             try {
-                const response = await fetch(state.scriptUrl, {
+                await fetch(state.scriptUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -596,6 +772,7 @@
             return `
                 <div class="container">
                     <div class="card">
+                        <div class="islamic-pattern">☪️</div>
                         <h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>
                         <p class="subtitle">Google Sheets Setup</p>
                         
@@ -642,7 +819,7 @@
                         </div>
 
                         <button class="btn btn-primary" onclick="checkSetup()">
-                            ✅ Setup সম্পন্ন, এগিয়ে যান
+                            <span style="position:relative; z-index:1;">✅ Setup সম্পন্ন, এগিয়ে যান</span>
                         </button>
                     </div>
                 </div>
@@ -653,17 +830,18 @@
             return `
                 <div class="container">
                     <div class="card">
+                        <div class="islamic-pattern">☪️</div>
                         <h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>
                         <p class="subtitle">রাসূলুল্লাহ ﷺ এর জীবনী নিয়ে জ্ঞান প্রতিযোগিতা</p>
                         
                         <div class="info-box">
                             <h3>প্রতিযোগিতার বিবরণ:</h3>
                             <ul>
-                                <li>📝 মোট প্রশ্ন: ৮টি MCQ</li>
-                                <li>⏰ সময়: ৩ মিনিট</li>
-                                <li>✅ একবার শুরু করলে পরীক্ষা শেষ না করে বের হওয়া যাবে না</li>
-                                <li>📊 উত্তর সরাসরি Google Sheets এ জমা হবে</li>
-                                <li>🎯 সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
+                                <li>মোট প্রশ্ন: ৮টি MCQ</li>
+                                <li>সময়: ৩ মিনিট</li>
+                                <li>একবার শুরু করলে পরীক্ষা শেষ না করে বের হওয়া যাবে না</li>
+                                <li>উত্তর সরাসরি Google Sheets এ জমা হবে</li>
+                                <li>সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন</li>
                             </ul>
                         </div>
 
@@ -678,7 +856,7 @@
                         </div>
 
                         <button class="btn btn-primary" onclick="startQuiz()">
-                            প্রতিযোগিতা শুরু করুন
+                            <span style="position:relative; z-index:1;">🚀 প্রতিযোগিতা শুরু করুন</span>
                         </button>
                     </div>
                 </div>
@@ -692,7 +870,7 @@
                         <div class="card">
                             <div class="loading">
                                 <div class="loading-spinner"></div>
-                                <p style="margin-top:20px; font-size:18px;">জমা হচ্ছে...</p>
+                                <p style="margin-top:20px; font-size:18px; font-weight:600;">জমা হচ্ছে...</p>
                             </div>
                         </div>
                     </div>
@@ -715,8 +893,8 @@
                 <div class="container">
                     <div class="timer-box">
                         <div class="timer-header">
-                            <div style="color:#065f46; font-weight:bold;">
-                                প্রশ্ন ${state.currentQuestion + 1} / ${QUESTIONS.length}
+                            <div style="color:#065f46; font-weight:bold; font-size:18px;">
+                                📝 প্রশ্ন ${state.currentQuestion + 1} / ${QUESTIONS.length}
                             </div>
                             <div class="timer" id="timerElement">
                                 ⏰ <span id="timer">${formatTime(state.timeLeft)}</span>
@@ -728,7 +906,7 @@
                     </div>
 
                     <div class="question-card">
-                        <span class="question-badge">বহুনির্বাচনী</span>
+                        <span class="question-badge">বহুনির্বাচনী প্রশ্ন</span>
                         <div class="question-text">${q.question}</div>
                         ${optionsHTML}
                     </div>
@@ -736,15 +914,15 @@
                     <div class="nav-buttons">
                         <button class="btn btn-secondary" onclick="prevQuestion()" 
                                 ${state.currentQuestion === 0 ? 'disabled' : ''}>
-                            পূর্ববর্তী
+                            <span style="position:relative; z-index:1;">← পূর্ববর্তী</span>
                         </button>
                         ${state.currentQuestion < QUESTIONS.length - 1 ? `
                             <button class="btn btn-primary" onclick="nextQuestion()">
-                                পরবর্তী প্রশ্ন
+                                <span style="position:relative; z-index:1;">পরবর্তী প্রশ্ন →</span>
                             </button>
                         ` : `
                             <button class="btn btn-danger" onclick="submitQuiz()">
-                                জমা দিন
+                                <span style="position:relative; z-index:1;">✓ জমা দিন</span>
                             </button>
                         `}
                     </div>
@@ -759,15 +937,15 @@
                         <div class="success-icon">✅</div>
                         <div class="success-message">
                             <h2>জমা সফল হয়েছে!</h2>
-                            <p style="font-size:20px; margin:20px 0;">${state.participant.name}, আপনার উত্তরপত্র  সফলভাবে জমা হয়েছে।</p>
+                            <p style="font-size:20px; margin:20px 0;">${state.participant.name}, আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>
                             
                             <div class="info-box" style="margin-top:30px;">
                                 <h3>📊 আপনার ফলাফল:</h3>
                                 <ul>
-                                    <li>✅ সঠিক উত্তর: <strong>${state.lastSubmission.correct}টি</strong></li>
-                                    <li>❌ ভুল উত্তর: <strong>${state.lastSubmission.wrong}টি</strong></li>
-                                    <li>⚪ উত্তর দেননি: <strong>${state.lastSubmission.unanswered}টি</strong></li>
-                                    <li>⏱️ সময় লেগেছে: <strong>${state.lastSubmission.timeTaken}</strong></li>
+                                    <li>সঠিক উত্তর: <strong>${state.lastSubmission.correct}টি</strong></li>
+                                    <li>ভুল উত্তর: <strong>${state.lastSubmission.wrong}টি</strong></li>
+                                    <li>উত্তর দেননি: <strong>${state.lastSubmission.unanswered}টি</strong></li>
+                                    <li>সময় লেগেছে: <strong>${state.lastSubmission.timeTaken}</strong></li>
                                 </ul>
                             </div>
 
