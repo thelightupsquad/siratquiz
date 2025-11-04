@@ -960,7 +960,7 @@ function selectShortAnswer(qId) {
     if (input) {
         state.answers[qId] = input.value.trim();
         saveState();
-        render();
+        // render() কল করবেন না - শুধু state সেভ করুন
     }
 }
 
