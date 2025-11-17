@@ -1405,6 +1405,19 @@ submission.unansweredCount = unansweredCount;
                 app.innerHTML = renderStart();
             } else if (state.view === 'quiz') {
                 app.innerHTML = renderQuiz();
+				
+				// Auto focus for short answer questions
+        setTimeout(function() {
+            var q = QUESTIONS[state.currentQuestion];
+            if (q.type === 'short') {
+                var input = document.getElementById('short-input-' + q.id);
+                if (input) {
+                    input.focus();
+                    input.click(); // Extra trigger for mobile
+                }
+            }
+        }, 150);
+				
             } else if (state.view === 'submitted') {
                 app.innerHTML = renderSubmitted();
             }
