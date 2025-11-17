@@ -152,6 +152,48 @@
             margin-bottom: 14px;
         }
         
+		.time-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #78350f;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(251, 191, 36, 0.5);
+    z-index: 9999;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    animation: slideDown 0.5s ease, fadeOut 0.5s ease 4.5s;
+    max-width: 90%;
+}
+
+.time-banner.warning {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    animation: slideDown 0.5s ease, pulse 1s infinite, fadeOut 0.5s ease 4.5s;
+}
+
+@keyframes slideDown {
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        top: -100px;
+    }
+}
+		
         label {
             display: block;
             color: #1f2937;
@@ -946,13 +988,14 @@ function getBengaliOption(index) {
         question: 'ওয়াহী লেখক সাহাবীদের মধ্যে সবচেয়ে প্রসিদ্ধ কে?'
     }
 ];
+	var TotalTime = 3 * 60; // Total quiz time in seconds
 	
         var state = {
             view: 'start',
             participant: { name: '', phone: '' },
             answers: {},
             currentQuestion: 0,
-            timeLeft: 60 * 60,
+            timeLeft: TotalTime,
             startTime: null,
             timerInterval: null,
             loading: false,
@@ -960,7 +1003,9 @@ function getBengaliOption(index) {
             submittedPhones: {},
             exitCount: 0,
             sessionId: null,
-            warningPlayed: false
+            warningPlayed: false,
+			halfTimeShown: false,      // Add this
+            fifteenMinShown: false     // Add this
         };
 
         var audioContext = null;
@@ -1019,6 +1064,27 @@ function getBengaliOption(index) {
                 console.log('Warning error:', e);
             }
         }
+		
+		function showTimeBanner(message, isWarning) {
+    // Remove existing banner if any
+    var existing = document.getElementById('timeBanner');
+    if (existing) {
+        existing.parentNode.removeChild(existing);
+    }
+    
+    var banner = document.createElement('div');
+    banner.id = 'timeBanner';
+    banner.className = 'time-banner' + (isWarning ? ' warning' : '');
+    banner.innerHTML = message;
+    document.body.appendChild(banner);
+    
+    // Auto remove after 5 seconds
+    setTimeout(function() {
+        if (banner.parentNode) {
+            banner.parentNode.removeChild(banner);
+        }
+    }, 5000);
+}
 
         function generateSessionId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -1043,7 +1109,7 @@ function getBengaliOption(index) {
                 alert('নাম ও মোবাইল নম্বর দিন');
                 return;
             }
-
+	
             if (!/^01\d{9}$/.test(phone)) {
                 alert('সঠিক মোবাইল নম্বর দিন');
                 return;
@@ -1078,23 +1144,40 @@ function getBengaliOption(index) {
         }
 
         function updateTimer() {
-            var el = document.getElementById('timer');
-            if (el) {
-                el.textContent = formatTime(state.timeLeft);
-                el.className = state.timeLeft <= 30 ? 'timer warning' : 'timer';
+    var el = document.getElementById('timer');
+    if (el) {
+        el.textContent = formatTime(state.timeLeft);
+        el.className = state.timeLeft <= 30 ? 'timer warning' : 'timer';
+    }
+    
+    // Half time warning (50% of total time)
+var halfTime = Math.floor(TotalTime / 2);
+if (state.timeLeft === halfTime && !state.halfTimeShown) {
+    state.halfTimeShown = true;
+    var remainingMinutes = Math.floor(state.timeLeft / 60); // Convert seconds to minutes
+    showTimeBanner('⏰ অর্ধেক সময় শেষ! আরও ' + toBengaliNumber(remainingMinutes) + ' মিনিট বাকি।', false);
+}
+    
+	
+    // 75% time warning (25% time left)
+    var quarterTime = Math.floor(TotalTime / 4);
+    if (state.timeLeft === quarterTime && !state.quarterTimeShown) {
+        state.quarterTimeShown = true;
+        var remainingMinutes = Math.floor(state.timeLeft / 60);
+        showTimeBanner('⚠️ সতর্কতা! আর মাত্র ' + toBengaliNumber(remainingMinutes) + ' মিনিট সময় বাকি!', true);
+    }
+    
+    if (state.timeLeft === 30 && !hasPlayedWarning) {
+        document.body.className = 'warning-time';
+        playWarningBeep();
+        
+        setTimeout(function() {
+            if (state.timeLeft > 0 && state.timeLeft < 30) {
+                document.body.className = '';
             }
-            
-            if (state.timeLeft === 30 && !hasPlayedWarning) {
-                document.body.className = 'warning-time';
-                playWarningBeep();
-                
-                setTimeout(function() {
-                    if (state.timeLeft > 0 && state.timeLeft < 30) {
-                        document.body.className = '';
-                    }
-                }, 30000);
-            }
-        }
+        }, 30000);
+    }
+}
 
         function submitQuiz() {
             if (state.timerInterval) clearInterval(state.timerInterval);
@@ -1158,9 +1241,14 @@ submission.unansweredCount = unansweredCount;
         }
 
         function selectAnswer(qId, idx) {
-            state.answers[qId] = idx;
-            render();
-        }
+    // Toggle: if already selected, unselect it
+    if (state.answers[qId] === idx) {
+        delete state.answers[qId];
+    } else {
+        state.answers[qId] = idx;
+    }
+    render();
+}
 
         function selectShortAnswer(qId) {
             var input = document.getElementById('short-input-' + qId);
@@ -1189,14 +1277,15 @@ submission.unansweredCount = unansweredCount;
                 '<h1>সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>' +
                 '<p class="subtitle">রাসূলুল্লাহ ﷺ এর জীবনী নিয়ে জ্ঞান প্রতিযোগিতা</p>' +
                 '<div class="info-box"><h3>প্রতিযোগিতার বিবরণ:</h3><ul>' +
-                '<li>মোট প্রশ্ন: ' + toBengaliNumber(QUESTIONS.length) + 'টি (৫০টি বহুনির্বাচনী + ২৫টি অতি সংক্ষিপ্ত)</li>' +
-				'<li>বহুনির্বাচনী (৫০ x ০.৫ = ২৫)  + অতি সংক্ষিপ্ত (২৫ x ১ = ২৫) মোট = ৫০ নম্বর</li>' +
-                '<li>সময়: ৬০ মিনিট (১ ঘণ্টা)</li>' +
+				'<li>মোট: <strong> ৫০ </strong> নম্বর  ||   সময়: <strong>' + toBengaliNumber(TotalTime / 60) + '</strong> মিনিট </li>' +
+                '<li>মোট প্রশ্ন: <strong>' + toBengaliNumber(QUESTIONS.length) + '</strong> টি (৫০টি  + ২৫টি )</li>' +
+				'<li>বহুনির্বাচনী (৫০ x ০.৫ = ২৫নম্বর) </li>' + 
+				'<li>অতি সংক্ষিপ্ত (২৫ x ১ = ২৫নম্বর) </li>' +
                 '<li>সব প্রশ্নের উত্তর দেওয়ার চেষ্টা করুন।</li>' +
                 '</ul></div>' +
                 '<div class="warning-box"><p>⚠️ প্রতিটি ভুল উত্তরের জন্য ০.২৫ নম্বর কর্তন করা হবে।</p></div>' +
                 '<div class="form-group"><label>👤 নাম <span style="color: #dc2626;">*</span> (বাংলা/English)</label>' +
-                '<input type="text" id="name" placeholder="পূর্ণ নাম লিখুন" ></div>' +
+                '<input type="text" id="name" placeholder="পূর্ণ নাম লিখুন"maxlength="42"></div>' +
                 '<div class="form-group"><label>📱 মোবাইল নম্বর <span style="color: #dc2626;">*</span> (English)</label>' + 
                 '<input type="tel" id="phone" placeholder="Ex: 01886667466"  maxlength="11"></div>' +
                 '<button class="btn btn-primary" onclick="startQuiz()">বিসমিল্লাহির রাহমানির রাহীম</button>' +
@@ -1238,7 +1327,8 @@ submission.unansweredCount = unansweredCount;
                     'class="short-answer-input ' + filledClass + '" ' +
                     'placeholder="এখানে উত্তর লিখুন" ' +
                     'value="' + currentAnswer + '" ' +
-                    'oninput="selectShortAnswer(' + q.id + ')">';
+                    'oninput="selectShortAnswer(' + q.id + ')" ' +
+					'autofocus>';
             }
 
             var isLast = state.currentQuestion === QUESTIONS.length - 1;
@@ -1358,7 +1448,7 @@ submission.unansweredCount = unansweredCount;
                 participant: { name: '', phone: '' },
                 answers: {},
                 currentQuestion: 0,
-                timeLeft: 60,
+                timeLeft: TotalTime,
                 startTime: null,
                 timerInterval: null,
                 loading: false,
@@ -1366,7 +1456,9 @@ submission.unansweredCount = unansweredCount;
                 submittedPhones: submittedPhones,
                 exitCount: 0,
                 sessionId: null,
-                warningPlayed: false
+                warningPlayed: false,
+				halfTimeShown: false,      // Reset this
+                fifteenMinShown: false     // Reset this
             };
             render();
         }
@@ -1399,7 +1491,7 @@ submission.unansweredCount = unansweredCount;
                             if (state.exitCount > 2) {
                                 if (state.timerInterval) clearInterval(state.timerInterval);
                                 alert('⚠️ আপনি ২ বারের বেশি পরীক্ষা থেকে বের হয়ে গেছেন!');
-                                resetQuiz();
+                                submitQuiz();
                                 return;
                             }
                             
