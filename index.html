@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>সীরাতুন নবী ﷺ প্রতিযোগিতা</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1373,44 +1375,67 @@ function handleEnterKey(event, qId) {
             return html;
         }
 
-        function renderSubmitted() {
-            var answersList = '';
-            
-            for (var i = 0; i < QUESTIONS.length; i++) {
-                var q = QUESTIONS[i];
-                var userAnswer = state.answers[q.id];
-                var answerText = '';
-                
-                if (userAnswer !== undefined) {
-                    if (q.type === 'mcq') {
-                        answerText = getBengaliOption(userAnswer) + '. ' + q.options[userAnswer];
-                    } else if (q.type === 'short') {
-                        answerText = userAnswer;
-                    }
-                } else {
-                    answerText = '<span style="color: #dc2626;">উত্তর দেননি</span>';
-                }
-                
-                answersList += '<li><strong>প্রশ্ন ' + toBengaliNumber(i + 1) + ':</strong> ' + answerText + '</li>';
+       function renderSubmitted() {
+    var answersList = '';
+    
+    for (var i = 0; i < QUESTIONS.length; i++) {
+        var q = QUESTIONS[i];
+        var userAnswer = state.answers[q.id];
+        var answerText = '';
+        
+        if (userAnswer !== undefined && userAnswer !== '') {
+            if (q.type === 'mcq') {
+                answerText = '<span style="color: #059669;">' + getBengaliOption(userAnswer) + '. ' + q.options[userAnswer] + '</span>';
+            } else if (q.type === 'short') {
+                answerText = '<span style="color: #059669;">' + userAnswer + '</span>';
             }
-            
-            return '<div class="container"><div class="card">' +
-                '<div class="success-icon">✅</div>' +
-                '<div class="success-message">' +
-                '<h2>জমা সফল হয়েছে!</h2>' +
-                '<p style="font-size:17px; margin:15px 0;">' + state.participant.name + ', আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>' +
-                '<div class="info-box" style="margin-top:20px;">' +
-                '<h3>📊 ফলাফল পরে জানানো হবে</h3><ul>' +
-                '<li>সময় লেগেছে: <strong>' + state.lastSubmission.timeTaken + '</strong></li>' +
-                '<li>বের হয়েছেন: <strong>' + state.lastSubmission.exitCount + ' বার</strong></li>' +
-                '</ul></div>' +
-                '<div class="info-box" style="margin-top:20px; max-height: 300px; overflow-y: auto;">' +
-                '<h3>📝 আপনার দেওয়া উত্তরসমূহ:</h3><ul>' +
-                answersList +
-                '</ul></div>' +
-                '<p style="color:#6b7280; margin-top:20px; font-size: 14px;">আল্লাহ আপনাকে উত্তম প্রতিদান দিন। 🤲</p>' +
-                '</div></div></div>';
+        } else {
+            answerText = '<span style="color: #dc2626; font-weight: 700;">✗ উত্তর দেননি</span>';
         }
+        
+        answersList += '<li style="padding: 8px; background: ' + (i % 2 === 0 ? '#f9fafb' : 'white') + '; border-radius: 6px; margin-bottom: 4px;">' +
+            '<strong style="color: #065f46;">প্রশ্ন ' + toBengaliNumber(i + 1) + ':</strong> ' + answerText + '</li>';
+    }
+    
+    var sessionId = state.lastSubmission.sessionId;
+    
+    return '<div class="container"><div class="card">' +
+        '<div class="success-icon">✅</div>' +
+        '<div class="success-message">' +
+        '<h2 style="color: #065f46; font-size: 26px; margin-bottom: 12px;">জমা সফল হয়েছে!</h2>' +
+        '<p style="font-size: 16px; color: #374151; margin: 12px 0; font-weight: 600;">' + state.participant.name + '</p>' +
+        '<p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">আপনার উত্তরপত্র সফলভাবে জমা হয়েছে।</p>' +
+        
+        '<div class="info-box" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #3b82f6; margin-bottom: 15px;">' +
+        '<h3 style="color: #1e40af; margin-bottom: 8px; font-size: 15px;">🆔 Session ID</h3>' +
+        '<p style="color: #1e3a8a; font-size: 16px; font-weight: 900; font-family: monospace; margin: 0; letter-spacing: 0.5px; word-break: break-all;">' + 
+        sessionId + '</p>' +
+        '<p style="color: #3b82f6; font-size: 11px; margin-top: 6px; font-weight: 600;">এই ID টি সংরক্ষণ করুন</p>' +
+        '</div>' +
+        
+        '<div class="info-box" style="margin-bottom: 15px;">' +
+        '<h3>📊 পরীক্ষার তথ্য</h3><ul style="margin: 0;">' +
+        '<li>সময় লেগেছে: <strong>' + state.lastSubmission.timeTaken + '</strong></li>' +
+        '<li>উত্তর দিয়েছেন: <strong>' + toBengaliNumber(state.lastSubmission.answeredCount) + ' টি</strong></li>' +
+        '<li>উত্তর দেননি: <strong>' + toBengaliNumber(state.lastSubmission.unansweredCount) + ' টি</strong></li>' +
+        '</ul></div>' +
+        
+        '<button onclick="downloadPDF()" class="btn btn-primary" style="margin-bottom: 12px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); display: flex; align-items: center; justify-content: center; gap: 8px;">' +
+        '<span style="font-size: 18px;">📥</span> PDF ডাউনলোড করুন</button>' +
+        
+        '<div class="info-box" style="margin-top: 15px; max-height: 350px; overflow-y: auto;">' +
+        '<h3 style="position: sticky; top: 0; background: #d1fae5; padding: 10px 0; margin: -16px -16px 12px -16px; padding-left: 16px; z-index: 1;">📝 আপনার দেওয়া উত্তরসমূহ</h3>' +
+        '<ul style="margin: 0; padding: 0; list-style: none;">' +
+        answersList +
+        '</ul></div>' +
+        
+        '<div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 12px; margin-top: 15px;">' +
+        '<p style="color: #78350f; font-size: 13px; margin: 0; font-weight: 600; text-align: center;">📢 ফলাফল ২-৩ দিনের মধ্যে প্রকাশ করা হবে ইনশাআল্লাহ্‌</p>' +
+        '</div>' +
+        
+        '<p style="color:#6b7280; margin-top: 20px; font-size: 14px; text-align: center;">জাযাকাল্লাহু খাইরান 🤲</p>' +
+        '</div></div></div>';
+}
 
         function render() {
             var app = document.getElementById('app');
@@ -1488,6 +1513,118 @@ function handleEnterKey(event, qId) {
             };
             render();
         }
+		
+		function downloadPDF() {
+    var pdfContent = document.createElement('div');
+    pdfContent.style.cssText = 'position: absolute; left: -9999px; top: 0; width: 800px; background: white; padding: 40px; font-family: Arial, sans-serif;';
+    
+    var sessionId = state.lastSubmission.sessionId;
+    
+    var html = '<div style="text-align: center; margin-bottom: 30px;">' +
+        '<h1 style="color: #065f46; font-size: 32px; margin: 0 0 10px 0;">সীরাতুন নবী ﷺ প্রতিযোগিতা</h1>' +
+        '<p style="color: #6b7280; font-size: 16px; margin: 0;">উত্তরপত্র</p>' +
+        '</div>' +
+        
+        '<div style="background: #dbeafe; border: 3px solid #3b82f6; border-radius: 12px; padding: 20px; margin-bottom: 25px;">' +
+        '<h3 style="color: #1e40af; font-size: 18px; margin: 0 0 10px 0;">🆔 Session ID</h3>' +
+        '<p style="color: #1e3a8a; font-size: 20px; font-weight: bold; font-family: monospace; margin: 0; word-break: break-all;">' + 
+        sessionId + '</p>' +
+        '</div>' +
+        
+        '<div style="background: #f3f4f6; border-radius: 10px; padding: 20px; margin-bottom: 25px;">' +
+        '<h3 style="color: #065f46; font-size: 18px; margin: 0 0 15px 0;">👤 অংশগ্রহণকারীর তথ্য</h3>' +
+        '<p style="margin: 8px 0; color: #374151; font-size: 15px;"><strong>নাম:</strong> ' + state.participant.name + '</p>' +
+        '<p style="margin: 8px 0; color: #374151; font-size: 15px;"><strong>মোবাইল:</strong> ' + state.participant.phone + '</p>' +
+        '<p style="margin: 8px 0; color: #374151; font-size: 15px;"><strong>সময় লেগেছে:</strong> ' + state.lastSubmission.timeTaken + '</p>' +
+        '<p style="margin: 8px 0; color: #374151; font-size: 15px;"><strong>উত্তর দিয়েছেন:</strong> ' + toBengaliNumber(state.lastSubmission.answeredCount) + ' টি</p>' +
+        '<p style="margin: 8px 0; color: #374151; font-size: 15px;"><strong>উত্তর দেননি:</strong> ' + toBengaliNumber(state.lastSubmission.unansweredCount) + ' টি</p>' +
+        '<p style="margin: 8px 0; color: #374151; font-size: 15px;"><strong>বের হয়েছেন:</strong> ' + toBengaliNumber(state.lastSubmission.exitCount) + ' বার</p>' +
+        '</div>' +
+        
+        '<div style="margin-bottom: 20px;">' +
+        '<h3 style="color: #065f46; font-size: 20px; margin: 0 0 15px 0; border-bottom: 3px solid #10b981; padding-bottom: 10px;">📝 আপনার দেওয়া উত্তরসমূহ</h3>';
+    
+    for (var i = 0; i < QUESTIONS.length; i++) {
+        var q = QUESTIONS[i];
+        var userAnswer = state.answers[q.id];
+        var answerText = '';
+        var answerColor = '#059669';
+        
+        if (userAnswer !== undefined && userAnswer !== '') {
+            if (q.type === 'mcq') {
+                answerText = getBengaliOption(userAnswer) + '. ' + q.options[userAnswer];
+            } else if (q.type === 'short') {
+                answerText = userAnswer;
+            }
+        } else {
+            answerText = '✗ উত্তর দেননি';
+            answerColor = '#dc2626';
+        }
+        
+        html += '<div style="background: ' + (i % 2 === 0 ? '#f9fafb' : 'white') + '; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #10b981;">' +
+            '<p style="margin: 0 0 8px 0; color: #065f46; font-size: 15px; font-weight: bold;">প্রশ্ন ' + toBengaliNumber(i + 1) + ': ' + q.question + '</p>' +
+            '<p style="margin: 0; color: ' + answerColor + '; font-size: 14px; font-weight: 600;">উত্তর: ' + answerText + '</p>' +
+            '</div>';
+    }
+    
+    html += '</div>' +
+        '<div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb;">' +
+        '<p style="color: #6b7280; font-size: 14px; margin: 0;">জাযাকাল্লাহু খাইরান 🤲</p>' +
+        '<p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0 0;">Generated on ' + new Date().toLocaleString('bn-BD') + '</p>' +
+        '</div>';
+    
+    pdfContent.innerHTML = html;
+    document.body.appendChild(pdfContent);
+    
+    // Show loading
+    var loadingDiv = document.createElement('div');
+    loadingDiv.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99999; display: flex; align-items: center; justify-content: center;';
+    loadingDiv.innerHTML = '<div style="background: white; padding: 30px 50px; border-radius: 12px; text-align: center;">' +
+        '<div style="border: 4px solid #f3f4f6; border-top: 4px solid #10b981; border-radius: 50%; width: 50px; height: 50px; margin: 0 auto 20px auto; animation: spin 1s linear infinite;"></div>' +
+        '<p style="color: #374151; font-size: 16px; font-weight: 600; margin: 0;">PDF তৈরি হচ্ছে...</p>' +
+        '</div>';
+    document.body.appendChild(loadingDiv);
+    
+    setTimeout(function() {
+        html2canvas(pdfContent, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        }).then(function(canvas) {
+            var { jsPDF } = window.jspdf;
+            
+            var imgWidth = 210;
+            var pageHeight = 297;
+            var imgHeight = canvas.height * imgWidth / canvas.width;
+            var heightLeft = imgHeight;
+            var position = 0;
+            
+            var pdf = new jsPDF('p', 'mm', 'a4');
+            var imgData = canvas.toDataURL('image/png');
+            
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+            
+            pdf.save('Seerah_Quiz_' + sessionId.substr(0, 10) + '.pdf');
+            
+            document.body.removeChild(pdfContent);
+            document.body.removeChild(loadingDiv);
+        }).catch(function(error) {
+            console.error('PDF Error:', error);
+            alert('PDF তৈরিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+            document.body.removeChild(pdfContent);
+            document.body.removeChild(loadingDiv);
+        });
+    }, 500);
+}
 
         var hiddenTime = null;
 
