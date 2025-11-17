@@ -1263,9 +1263,7 @@ function handleEnterKey(event, qId) {
         selectShortAnswer(qId);
         
         var isLast = state.currentQuestion === QUESTIONS.length - 1;
-        if (isLast) {
-            submitQuiz();
-        } else {
+        if (!isLast) {
             nextQuestion();
         }
     }
