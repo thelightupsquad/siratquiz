@@ -1257,6 +1257,20 @@ submission.unansweredCount = unansweredCount;
             }
         }
 
+function handleEnterKey(event, qId) {
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault();
+        selectShortAnswer(qId);
+        
+        var isLast = state.currentQuestion === QUESTIONS.length - 1;
+        if (isLast) {
+            submitQuiz();
+        } else {
+            nextQuestion();
+        }
+    }
+}
+
         function nextQuestion() {
             if (state.currentQuestion < QUESTIONS.length - 1) {
                 state.currentQuestion++;
@@ -1328,6 +1342,7 @@ submission.unansweredCount = unansweredCount;
                     'placeholder="এখানে উত্তর লিখুন" ' +
                     'value="' + currentAnswer + '" ' +
                     'oninput="selectShortAnswer(' + q.id + ')" ' +
+					'onkeypress="handleEnterKey(event, ' + q.id + ')" ' +
 					'autofocus>';
             }
 
