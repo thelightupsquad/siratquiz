@@ -271,19 +271,14 @@
             box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
         }
         
-        .timer-box {
-    background: rgba(255, 255, 255, 0.99);
-    border-radius: 12px;
-    padding: 10px 16px 10px 16px;
-    margin-bottom: 12px;  /* This creates space between timer and question */
-    border: 2px solid rgba(186, 230, 253, 0.3);
-    position: fixed;  
+       .timer-box {
+    position: fixed !important;  /* sticky থেকে fixed করুন */
     top: 8px;
+    left: 8px;
+    right: 8px;
     max-width: 884px;  /* container width + padding */
+    margin: 0 auto;
     z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
      
         .timer-header {
@@ -326,7 +321,6 @@
             background: white;
             border-radius: 12px;
             padding: 18px;
-			margin-top: 70px !important;  /* Timer box এর height + margin */
             margin-bottom: 12px;
             border: 2px solid #f3f4f6;
             text-align: center;
