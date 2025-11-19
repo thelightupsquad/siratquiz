@@ -1355,6 +1355,8 @@ function handleEnterKey(event, qId) {
                 '<div class="timer-info">📝 প্রশ্ন ' + toBengaliNumber(state.currentQuestion + 1) + '/' + toBengaliNumber(QUESTIONS.length) + '</div>' +
                 '<div class="' + (state.timeLeft <= 30 ? 'timer warning' : 'timer') + '">⏰ <span id="timer">' + formatTime(state.timeLeft) + '</span></div>' +
                 '</div>' +
+				'</div>' +
+				'</div>' +
                 '<div class="question-card" style="margin-top: 0;">' +
                 '<span class="question-badge">' + (q.type === 'mcq' ? 'বহুনির্বাচনী' : 'অতি সংক্ষিপ্ত') + '</span>' +
                 '<div class="question-text">' + q.question + '</div>' +
