@@ -1093,11 +1093,10 @@ function getBengaliOption(index) {
         }
 
         function formatTime(sec) {
-            var m = Math.floor(sec / 60);
-            var s = sec % 60;
-            var timeStr = m + ':' + (s < 10 ? '0' : '') + s;
-            return toBengaliNumber(timeStr);
-        }
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return toBengaliNumber(m) + ' মিনিট ' + toBengaliNumber(s) + ' সেকেন্ড';
+}
 
         function startQuiz() {
             var nameInput = document.getElementById('name');
