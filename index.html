@@ -277,9 +277,9 @@
     padding: 10px 16px 10px 16px;
     margin-bottom: 12px;  /* This creates space between timer and question */
     border: 2px solid rgba(186, 230, 253, 0.3);
-    position: sticky;  /* Changed from fixed to sticky */
-    position: -webkit-sticky;  /* Safari support */
+    position: fixed;  
     top: 8px;
+    max-width: 884px;  /* container width + padding */
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
@@ -326,6 +326,7 @@
             background: white;
             border-radius: 12px;
             padding: 18px;
+			margin-top: 70px !important;  /* Timer box এর height + margin */
             margin-bottom: 12px;
             border: 2px solid #f3f4f6;
             text-align: center;
