@@ -272,21 +272,18 @@
         }
         
         .timer-box {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.85);
     border-radius: 12px;
-    padding: 10px 16px 10px 16px;  /* Equal top and bottom padding */
-    margin-bottom: 12px;
-    border: 2px solid rgba(16, 185, 129, 0.2);
-    position: fixed;
+    padding: 10px 16px 10px 16px;
+    margin-bottom: 12px;  /* This creates space between timer and question */
+    border: 2px solid rgba(16, 185, 129, 0.3);
+    position: sticky;  /* Changed from fixed to sticky */
+    position: -webkit-sticky;  /* Safari support */
     top: 8px;
-    left: 8px;
-    right: 8px;
-	min-height: 20px; 
-    max-width: 884px; /* 900px container - 16px padding */
-    margin-left: auto;
-    margin-right: auto;
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
      
         .timer-header {
@@ -301,6 +298,7 @@
             color: #065f46;
             font-weight: 700;
             font-size: 20px;
+			line-height: 1.2;
         }
         
         .timer {
@@ -308,6 +306,7 @@
             font-size: 22px;
             font-weight: 900 !important;
             font-family: 'Courier New', monospace;
+			line-height: 1.2;
         }
         
         .timer.warning {
@@ -513,13 +512,30 @@
             }
             
             .timer-box {
-                padding: 10px;
-                margin-bottom: 12px;
-            }
-            
-            .timer {
-                font-size: 20px;
-            }
+        padding: 8px 12px 8px 12px;
+        margin-bottom: 12px;  /* Space before question card */
+        top: 6px;
+        border-radius: 10px;
+    }
+    
+    .timer-header {
+        margin-bottom: 0;
+    }
+    
+    .timer-info {
+        font-size: 16px;
+        line-height: 1.2;
+    }
+    
+    .timer {
+        font-size: 18px;
+        line-height: 1.2;
+    }
+    
+    .question-card {
+        padding: 18px;
+        margin-bottom: 12px;
+    }
             
             .question-text {
                 font-size: 18px;
