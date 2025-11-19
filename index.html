@@ -272,12 +272,19 @@
         }
         
         .timer-box {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 8px 12px;  
-            margin-bottom: 12px;
-            border: 2px solid rgba(16, 185, 129, 0.2);
-        }
+    background: rgba(255, 255, 255, 0.99);
+    border-radius: 12px;
+    padding: 10px 16px 10px 16px;
+    margin-bottom: 12px;  /* This creates space between timer and question */
+    border: 2px solid rgba(186, 230, 253, 0.3);
+    position: sticky;  /* Changed from fixed to sticky */
+    position: -webkit-sticky;  /* Safari support */
+    top: 8px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
      
         .timer-header {
             display: flex;
@@ -504,7 +511,6 @@
             
             .timer-box {
         padding: 8px 12px 8px 12px;
-		position: fixed !important;
         margin-bottom: 12px;  /* Space before question card */
         top: 6px;
         border-radius: 10px;
@@ -1008,7 +1014,7 @@ function getBengaliOption(index) {
             sessionId: null,
             warningPlayed: false,
 			halfTimeShown: false,      // Add this
-            quarterTimeShown: false     // Add this
+            fifteenMinShown: false     // Add this
         };
 
         var audioContext = null;
@@ -1350,13 +1356,13 @@ function handleEnterKey(event, qId) {
             var isLast = state.currentQuestion === QUESTIONS.length - 1;
            
             var html = '<div class="container">' +
-                '<div class="timer-box" style="position: fixed; top: 8px; z-index: 1000;">' +
+                '<div class="timer-box">' +
                 '<div class="timer-header">' +
                 '<div class="timer-info">📝 প্রশ্ন ' + toBengaliNumber(state.currentQuestion + 1) + '/' + toBengaliNumber(QUESTIONS.length) + '</div>' +
                 '<div class="' + (state.timeLeft <= 30 ? 'timer warning' : 'timer') + '">⏰ <span id="timer">' + formatTime(state.timeLeft) + '</span></div>' +
                 '</div>' +
-				'</div>' +
-                '<div class="question-card" style="margin-top: 0;">' +
+                '</div>' +
+                '<div class="question-card">' +
                 '<span class="question-badge">' + (q.type === 'mcq' ? 'বহুনির্বাচনী' : 'অতি সংক্ষিপ্ত') + '</span>' +
                 '<div class="question-text">' + q.question + '</div>' +
                 opts +
