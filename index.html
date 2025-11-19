@@ -323,20 +323,6 @@
             50% { opacity: 0.6; }
         }
         
-        .progress-bar {
-            width: 100%;
-            height: 5px;
-            background: #e5e7eb;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #10b981;
-            border-radius: 10px;
-        }
-        
         .question-card {
             background: white;
             border-radius: 12px;
@@ -531,10 +517,6 @@
             
             .timer {
                 font-size: 20px;
-            }
-            
-            .progress-bar {
-                height: 6px;
             }
             
             .question-text {
@@ -1325,8 +1307,7 @@ function handleEnterKey(event, qId) {
             }
     
 			var q = QUESTIONS[state.currentQuestion];
-            var progress = ((state.currentQuestion + 1) / QUESTIONS.length) * 100;
-            
+
             if (state.timeLeft <= 30) {
                 document.body.className = 'warning-time';
             } else {
@@ -1363,7 +1344,6 @@ function handleEnterKey(event, qId) {
                 '<div class="timer-info">📝 প্রশ্ন ' + toBengaliNumber(state.currentQuestion + 1) + '/' + toBengaliNumber(QUESTIONS.length) + '</div>' +
                 '<div class="' + (state.timeLeft <= 30 ? 'timer warning' : 'timer') + '">⏰ <span id="timer">' + formatTime(state.timeLeft) + '</span></div>' +
                 '</div>' +
-                '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
                 '</div>' +
                 '<div class="question-card">' +
                 '<span class="question-badge">' + (q.type === 'mcq' ? 'বহুনির্বাচনী' : 'অতি সংক্ষিপ্ত') + '</span>' +
